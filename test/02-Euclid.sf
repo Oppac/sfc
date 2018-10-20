@@ -1,0 +1,18 @@
+BEGINPROG Euclid
+
+VARIABLES a, b
+
+  READ(a)
+  READ(b)
+
+  WHILE b <> 0 DO
+    c := b
+    WHILE a >= b DO
+      a := a-b
+    ENDWHILE
+    b := a
+    a := c
+  ENDWHILE
+  PRINT(a)
+
+ENDPROG

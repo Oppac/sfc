@@ -1,0 +1,8 @@
+BEGINPROG TrAP
+
+VARIABLES n00mb4r,n
+
+  n00mb4r := 0
+  n := -100001
+
+ENDPROG

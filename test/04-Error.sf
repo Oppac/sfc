@@ -1,0 +1,15 @@
+/* Incorrect program to test errors
+   Use error.jar to have only warnings */
+
+
+BEGINPROG ERRORs
+
+/* /* */ */
+/* VARIABLES 0num, reSult, hel:lo
+  0num := 0000
+  reSult := 001
+  hello : = 45
+
+  IT (num0 => 0025) THEN
+    PINT(num000)
+ENDPROGS
