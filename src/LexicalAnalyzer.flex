@@ -45,27 +45,27 @@ import java.util.Map;
   }
 
   private void syntaxError(int line, Object value) {
-    System.out.println("Syntax error at line "
+    throw new Error("Syntax error at line "
     + line + " -> " + value.toString());
   }
 
   private void illegalNumError(int line, Object value) {
-    System.out.println("Number starting by 0 at line "
+    throw new Error("Number starting by 0 at line "
     + line + " -> " + value.toString());
   }
 
   private void varCapError(int line, Object value) {
-    System.out.println("Variable name must only contain lower case letters, at line "
+    throw new Error("Variable name must only contain lower case letters, at line "
     + line + " -> " + value.toString());
   }
 
   private void varNumError(int line, Object value) {
-    System.out.println("Variable name must not begin by a number, at line "
+    throw new Error("Variable name must not begin by a number, at line "
     + line + " -> " + value.toString());
   }
 
   private void commentError(int line, Object value) {
-    System.out.println("Comment must be closed and opened, at line "
+    throw new Error("Comments must be closed and opened properly, at line "
     + line + " -> " + value.toString());
   }
 
@@ -85,7 +85,7 @@ VarName          = {lower_letters}+ {alphanumeric}*
 ProgName         = {upper_letters}+ ({letters}* {alphanumeric}+ {letters}*)
 Endline          = "\r"|"\n"|"\r\n"
 Number           = [1-9]+ {digits}* | "0"
-IllegalNum       = "0"{digits}*
+IllegalNum       = (0{digits}*)
 IllegalVarNum    = {digits}+{lower_letters}+ {alphanumeric}*
 IllegalVarCap    = {lower_letters}+ ({upper_letters}+{alphanumeric}*|{alphanumeric}*{upper_letters}+)
 ErrorCap         = {upper_letters}+ {upper_letters}*
@@ -93,7 +93,7 @@ ErrorCap         = {upper_letters}+ {upper_letters}*
 BlockComment     = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 LineComment      = "//" [^\r\n]* {Endline}?
 Comments         = {BlockComment} | {LineComment}
-SoloComment      = "/*" | "*\""
+SoloComment      = "/*" | "*/"
 BlankSpace       = [\ \t\f]
 
 %xstate YYINITIAL
@@ -148,6 +148,8 @@ BlankSpace       = [\ \t\f]
   "<="            {token(LexicalUnit.LEQ, yyline, yycolumn, yytext());}
   "<"             {token(LexicalUnit.LT, yyline, yycolumn, yytext());}
   "<>"            {token(LexicalUnit.NEQ, yyline, yycolumn, yytext());}
+  "=>"            {syntaxError(yyline, yytext());}
+  "=<"            {syntaxError(yyline, yytext());}
 
   {Comments}      { }
   {BlankSpace}    { }
