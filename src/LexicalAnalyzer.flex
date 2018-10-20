@@ -12,14 +12,17 @@ import java.util.Map;
 
 %{
 
+  //The symbolic table data structure
   static LinkedHashMap<String, Integer> symbolicTable = new LinkedHashMap<String, Integer>();
 
+  //Create the symbolic table, keep the input order
   public static void table(Object varName, int line) {
     if (!symbolicTable.containsKey(varName.toString())) {
       symbolicTable.put(varName.toString(), line);
     }
   }
 
+  //Sort in lexical order than print the symbolic table
   private static void printTable() {
     System.out.println("\nIdentifiers");
     TreeMap<String, Integer> sorted = new TreeMap<>();
@@ -30,12 +33,14 @@ import java.util.Map;
 
   }
 
+  //Print then return the symbol
   public static Symbol token(LexicalUnit tokenType, int line, int column, Object value) {
     Symbol sym = new Symbol(tokenType, line, column, value);
     printToken(sym);
     return(sym);
   }
 
+  //Print the token, \n is print as a string and not an end of file
   private static void printToken(Symbol sym) {
     if (sym.getType().equals(LexicalUnit.ENDLINE)) {
       System.out.println(String.format("token: %-15slexical unit: %s", "\\n", sym.getType().toString()));
@@ -44,26 +49,33 @@ import java.util.Map;
     }
   }
 
+  //Default syntax error
   private void syntaxError(int line, Object value) {
     throw new Error("Syntax error at line "
     + line + " -> " + value.toString());
   }
 
+  //Specific errors
+
+  //Error when a number has one or more leading 0
   private void illegalNumError(int line, Object value) {
     throw new Error("Number starting by 0 at line "
     + line + " -> " + value.toString());
   }
 
+  //Error when a variable name contains a upper case letter
   private void varCapError(int line, Object value) {
     throw new Error("Variable name must only contain lower case letters, at line "
     + line + " -> " + value.toString());
   }
 
+  //Error when a variable name begin with a number
   private void varNumError(int line, Object value) {
     throw new Error("Variable name must not begin by a number, at line "
     + line + " -> " + value.toString());
   }
 
+  //Error when a comment symbol is found alone
   private void commentError(int line, Object value) {
     throw new Error("Comments must be closed and opened properly, at line "
     + line + " -> " + value.toString());
@@ -148,6 +160,8 @@ BlankSpace       = [\ \t\f]
   "<="            {token(LexicalUnit.LEQ, yyline, yycolumn, yytext());}
   "<"             {token(LexicalUnit.LT, yyline, yycolumn, yytext());}
   "<>"            {token(LexicalUnit.NEQ, yyline, yycolumn, yytext());}
+
+  //Specific error for misspelled comparator
   "=>"            {syntaxError(yyline, yytext());}
   "=<"            {syntaxError(yyline, yytext());}
 
