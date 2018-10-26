@@ -1,0 +1,6 @@
+Transformed Super-Fortran Grammar
+
+[1] <Program> -> BEGINPROG [ProgName] [EndLine] <Variables> <Code> ENDPROG
+[2] <Variables> -> VARIABLES <VarList> [EndLine]
+		-> EPSILON
+[3] 
