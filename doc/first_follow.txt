@@ -1,0 +1,66 @@
+-------------- First Set -------------------
+
+First(<Program>) = {BEGINPROG}
+First(<Variables>) = {VARIABLES, EPSILON}
+First(<VarList>) = {[VarName]}
+First(<VarListEnd>) = {COMMA, EPSILON}
+First(<Code>) = {[VarName], If, WHILE, FOR, PRINT, READ, EPSILON}
+First(<Instruction>) = {READ, WHILE, FOR, PRINT, [VarName], IF}
+First(<Assign>) = {[VarName]}
+First(<ExprArith>) = {[VarName], [Number], LPAREN, MINUS}
+First(<HpProd>) = {[VarName], [Number], LPAREN, MINUS}
+First(<HpExpr>) = {TIMES, DIVIDE, EPSILON}
+First(<LpExpr>) = {PLUS, MINUS, EPSILON}
+First(<SimpleExpr>) = {[VarName], [Number], LPAREN, MINUS}
+First(<LpOp>) = {PLUS, MINUS}
+First(<HpOp>) = {TIMES, DIVIDE}
+First(<If>) = {IF}
+First(<IfElse>) = {ELSE, EPSILON}
+First(<Cond>) = {[VarName], [Number], LPAREN, NOT, MINUS}
+First(<PCond>) = {[VarName], [Number], LPAREN, NOT, MINUS}
+First(<HpCond>) = {AND, EPSILON}
+First(<LpCond>) = {OR, EPSILON}
+First(<SimpleCond>) = {[VarName], [Number], LPAREN, NOT, MINUS}
+First(<Comp>) = {EQ, GEQ, GT, LEQ, LT, NEQ}
+First(<While>) = {WHILE}
+First(<For>) = {FOR}
+First(<Print>) = {PRINT}
+First(<Read>) = {READ}
+First(<ExpList>) = {[VarName], [Number], LPAREN, MINUS}
+First(<ExpListEnd>) = {COMMA, EPSILON}
+
+-------------- Follow Set --------------------------
+
+Follow(<Program>) = {$}
+Follow(<Variables>) = {EPSILON}
+Follow(<VarList>) = {ENDLINE}
+Follow(<VarListEnd>) = {ENDLINE}
+Follow(<Code>) = {ENDIF, ENDWHILE, ENDFOR, ENDPROG, ENDLINE}
+Follow(<Instruction>) = {ENDLINE}
+Follow(<Assign>) = {ENDLINE}
+Follow(<ExprArith>) = {THEN, DO, TO, RPAREN, ENDLINE, EQ, GEQ, GT, LEQ, LT, NEQ}
+Follow(<HpProd>) = {THEN, DO, TO, RPAREN, ENDLINE, EQ, GEQ, GT, LEQ, LT, NEQ}
+Follow(<HpExpr>) = {THEN, DO, TO, RPAREN, ENDLINE, EQ, GEQ, GT, LEQ, LT, NEQ}
+Follow(<LpExpr>) = {THEN, DO, TO, RPAREN, ENDLINE, EQ, GEQ, GT, LEQ, LT, NEQ}
+Follow(<SimpleExpr>) = {THEN, DO, TO, RPAREN, ENDLINE, EQ, GEQ, GT, LEQ, LT, NEQ}
+Follow(<LpOp>) = {[VarName], [Number], LPAREN, MINUS}
+Follow(<HpOp>) = {[VarName], [Number], LPAREN, MINUS}
+Follow(<If>) = {ENDLINE}
+Follow(<IfElse>) = {ENDIF}
+Follow(<Cond>) = {THEN, DO}
+Follow(<PCond>) = {THEN, DO}
+Follow(<HpCond>) = {THEN, DO}
+Follow(<LpCond>) = {THEN, DO}
+Follow(<SimpleCond>) = {THEN, DO}
+Follow(<Comp>) = {[VarName], [Number], LPAREN, MINUS}
+Follow(<While>) = {ENDLINE}
+Follow(<For>) = {ENDLINE}
+Follow(<Print>) = {ENDLINE}
+Follow(<Read>) = {ENDLINE}
+Follow(<ExpList>) = {RPAREN}
+Follow(<ExpListEnd>) = {RPAREN}
+
+
+
+
+

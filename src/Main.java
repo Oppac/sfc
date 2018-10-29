@@ -25,9 +25,9 @@ public class Main {
   private static void startCompilation(String filePath) {
     try {
       //Generated lexer
-      Lexer scanner = new Lexer(new BufferedReader(new FileReader(filePath)));
-      //Output the result of the compilation
-      scanner.yylex();
+      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)));
+      parser.startParse();
+
     } catch (Exception e) {
       System.err.println("Failed to compile " + filePath);
     }
