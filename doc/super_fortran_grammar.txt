@@ -33,7 +33,7 @@ Transformed Super-Fortran Grammar
 [31] <IfElse>		  -> ELSE [EndLine] <Code>
 [32]			  -> EPSILON
 [33] <Cond>		  -> <PCond> <LpCond>
-[34] <PCond>		  -> <SimpleExpr> <HpCond>
+[34] <PCond>		  -> <SimpleCond> <HpCond>
 [35] <HpCond>		  -> AND <SimpleCond> <HpCond>
 [36] 			  -> EPSILON
 [37] <LpCond>		  -> OR <PCond> <LpCond>

@@ -7,7 +7,7 @@ BEGINPROG Factorial
 VARIABLES number, result    /* Declare all the variables which
                                will be used in the program */
   READ(number)              // Read a number from user input
-  result := 1
+  result := (3 + 4 * 2)
 
   IF (number >= 0) THEN
     FOR i := 1 TO number DO  // The FOR variable is implicitly declared
