@@ -57,6 +57,7 @@ public class Parser {
   private static final int READ = 42;
   private static final int EXPLIST = 43;
   private static final int EXPLISTEND = 44;
+  private static final int EXPLISTEND_EPSILON = 44;
 
 
   public static boolean VERBOSE = false;
@@ -70,12 +71,13 @@ public class Parser {
     this.lookahead = scanner.yylex();
   }
 
-  private void compareToken(LexicalUnit token) {
+  private void compareToken(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
       System.out.println("\nError " + lookahead.getType() + " != " + token);
     } else {
       System.out.println("\nOk " + lookahead.getType() + " == " + token);
     }
+    nextToken();
   }
 
   public void startParse() throws IOException {
@@ -93,39 +95,33 @@ public class Parser {
     skipEndline();
     System.out.print(" " + "PROGRAM" + " ");
     compareToken(LexicalUnit.BEGINPROG);
-    nextToken();
     compareToken(LexicalUnit.PROGNAME);
-    nextToken();
     compareToken(LexicalUnit.ENDLINE);
     skipEndline();
     variables();
-    nextToken();
     skipEndline();
     code();
-    //compareToken(LexicalUnit.ENDPROG);
-    //nextToken();
-    //compareToken(LexicalUnit.EOS);
+    skipEndline();
+    compareToken(LexicalUnit.ENDPROG);
+    skipEndline();
+    compareToken(LexicalUnit.EOS);
   }
 
   private void variables() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.VARIABLES)) {
       System.out.print("VARIABLES" + " ");
       compareToken(LexicalUnit.VARIABLES);
-      nextToken();
       varlist();
-      compareToken(LexicalUnit.ENDLINE);
       skipEndline();
     } else {
       System.out.print("VARIABLES_EPSILON" + " ");
       nextToken();
-      return;
     }
   }
 
   private void varlist() throws IOException {
     System.out.print("VARLIST" + " ");
     compareToken(LexicalUnit.VARNAME);
-    nextToken();
     varlistend();
   }
 
@@ -133,14 +129,11 @@ public class Parser {
     if (lookahead.getType().equals(LexicalUnit.COMMA)) {
       System.out.print("VARLISTEND" + " ");
       compareToken(LexicalUnit.COMMA);
-      nextToken();
       compareToken(LexicalUnit.VARNAME);
       varlistend();
     } else {
      System.out.print("VARLISTEND_EPSILON" + " ");
-     return;
    }
-
   }
 
   private void code() throws IOException {
@@ -154,13 +147,10 @@ public class Parser {
         System.out.print("CODE" + " ");
         instruction();
         if (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
-          nextToken();
+          skipEndline();
           code();
         }
         break;
-      default:
-        nextToken();
-        return;
     }
   }
 
@@ -196,38 +186,8 @@ public class Parser {
   private void assign() throws IOException {
     System.out.print("ASSIGN" + " ");
     compareToken(LexicalUnit.VARNAME);
-    nextToken();
     compareToken(LexicalUnit.ASSIGN);
-    nextToken();
     exprArith();
-    nextToken();
-    skipEndline();
-    code();
-  }
-
-  private void parse_while() throws IOException {
-
-  }
-
-  private void parse_for() throws IOException {
-
-  }
-
-  private void parse_print() throws IOException {
-
-  }
-
-  private void parse_read() throws IOException {
-    System.out.print("READ" + " ");
-    compareToken(LexicalUnit.READ);
-    nextToken();
-    compareToken(LexicalUnit.LPAREN);
-    nextToken();
-    varlist();
-    compareToken(LexicalUnit.RPAREN);
-    nextToken();
-    skipEndline();
-    code();
   }
 
   private void exprArith() throws IOException {
@@ -251,7 +211,6 @@ public class Parser {
           hpExpr();
     } else {
       System.out.print("HPEXPR_EPSILON" + " ");
-      return;
     }
   }
 
@@ -270,17 +229,16 @@ public class Parser {
       case VARNAME:
         System.out.print("SIMPLEEXPR_VARNAME" + " ");
         nextToken();
-        return;
+        break;
       case NUMBER:
         System.out.print("SIMPLEEXPR_NUMBER" + " ");
         nextToken();
-        return;
+        break;
       case LPAREN:
         System.out.print("SIMPLEEXPR_PAREN" + " ");
         nextToken();
         exprArith();
         compareToken(LexicalUnit.RPAREN);
-        nextToken();
         break;
       case MINUS:
         System.out.print("SIMPLEEXPR_MINUS" + " ");
@@ -312,32 +270,24 @@ public class Parser {
   private void parse_if() throws IOException {
     System.out.print("IF" + " ");
     compareToken(LexicalUnit.IF);
-    nextToken();
     compareToken(LexicalUnit.LPAREN);
-    nextToken();
     cond();
     compareToken(LexicalUnit.RPAREN);
-    nextToken();
     compareToken(LexicalUnit.THEN);
-    nextToken();
+    skipEndline();
     code();
     ifElse();
     compareToken(LexicalUnit.ENDIF);
-    nextToken();
-    code();
   }
 
   private void ifElse() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.ELSE)) {
       System.out.print("IFELSE" + " ");
       compareToken(LexicalUnit.ELSE);
-      nextToken();
       compareToken(LexicalUnit.ENDLINE);
-      nextToken();
       code();
     } else {
       System.out.print("IFELSE_EPSILON" + " ");
-      return;
     }
   }
 
@@ -357,12 +307,10 @@ public class Parser {
     if (lookahead.getType().equals(LexicalUnit.AND)) {
           System.out.print("HPCOND_AND" + " ");
           compareToken(LexicalUnit.AND);
-          nextToken();
           simpleCond();
           hpCond();
     } else {
       System.out.print("HPCOND_EPSILON" + " ");
-      return;
     }
   }
 
@@ -370,7 +318,6 @@ public class Parser {
     if (lookahead.getType().equals(LexicalUnit.OR)) {
       System.out.print("LPCOND_OR" + " ");
       compareToken(LexicalUnit.OR);
-      nextToken();
       pCond();
       lpCond();
     } else {
@@ -382,7 +329,6 @@ public class Parser {
     if (lookahead.getType().equals(LexicalUnit.NOT)) {
       System.out.print("SIMPLECOND_NOT");
       compareToken(LexicalUnit.NOT);
-      nextToken();
       simpleCond();
     } else {
       exprArith();
@@ -396,35 +342,81 @@ public class Parser {
       case EQ:
         System.out.print("COMP_EQ");
         compareToken(LexicalUnit.EQ);
-        nextToken();
         break;
       case GEQ:
         System.out.print("COMP_GEQ");
         compareToken(LexicalUnit.GEQ);
-        nextToken();
         break;
       case GT:
         System.out.print("COMP_GT");
         compareToken(LexicalUnit.GT);
-        nextToken();
         break;
       case LEQ:
         System.out.print("COMP_LEQ");
         compareToken(LexicalUnit.LEQ);
-        nextToken();
         break;
       case LT:
         System.out.print("COMP_LT");
         compareToken(LexicalUnit.LT);
-        nextToken();
         break;
       case NEQ:
         System.out.print("COMP_NEQ");
         compareToken(LexicalUnit.NEQ);
-        nextToken();
         break;
     }
   }
 
+  private void parse_while() throws IOException {
+    System.out.print("WHILE" + " ");
+    compareToken(LexicalUnit.WHILE);
+    cond();
+    code();
+    compareToken(LexicalUnit.ENDWHILE);
+  }
+
+  private void parse_for() throws IOException {
+    System.out.print("FOR" + " ");
+    compareToken(LexicalUnit.FOR);
+    compareToken(LexicalUnit.VARNAME);
+    compareToken(LexicalUnit.ASSIGN);
+    exprArith();
+    compareToken(LexicalUnit.TO);
+    exprArith();
+    compareToken(LexicalUnit.DO);
+    skipEndline();
+    code();
+    compareToken(LexicalUnit.ENDFOR);
+  }
+
+  private void parse_print() throws IOException {
+    compareToken(LexicalUnit.PRINT);
+    compareToken(LexicalUnit.LPAREN);
+    exprList();
+    compareToken(LexicalUnit.RPAREN);
+  }
+
+  private void parse_read() throws IOException {
+    System.out.print("READ" + " ");
+    compareToken(LexicalUnit.READ);
+    compareToken(LexicalUnit.LPAREN);
+    varlist();
+    compareToken(LexicalUnit.RPAREN);
+  }
+
+  private void exprList() throws IOException {
+    System.out.print("EXPLIST" + " ");
+    exprArith();
+    expListEnd();
+  }
+
+  private void expListEnd() throws IOException {
+    if (lookahead.getType().equals(LexicalUnit.COMMA)) {
+      System.out.print("EXPLISTEND" + " ");
+      compareToken(LexicalUnit.COMMA);
+      exprList();
+    } else {
+      System.out.print("EXPLISTEND_EPSILON" + " ");
+    }
+  }
 
 }
