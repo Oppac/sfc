@@ -138,8 +138,30 @@ public class Parser {
   }
 
   private void code() throws IOException {
-    System.out.print("Hello");
-    nextToken();
+    switch(lookahead.getType()) {
+      case VARNAME:
+      case IF:
+      case WHILE:
+      case FOR:
+      case PRINT:
+      case READ:
+        System.out.print("Code" + " ");
+        instruction();
+        if (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
+          nextToken();
+          code();
+        }
+        break;
+      default:
+        nextToken();
+        return;
+    }
+  }
+
+  private void instruction() {
+    //switch(lookahead.getType()) {
+
+    //}
   }
 
 
