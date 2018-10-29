@@ -10,6 +10,7 @@ VARIABLES number, result    /* Declare all the variables which
   result := (3 + 4 * 2)
 
   IF (number >= 0) THEN
+
     FOR i := 1 TO number DO  // The FOR variable is implicitly declared
       result := result * i   // (It cannot be modified)
     ENDFOR
