@@ -15,7 +15,7 @@ Transformed Super-Fortran Grammar
 [13]			  -> <Print>
 [14]			  -> <Read>
 [15] <Assign>		  -> [VarName] ASSIGN <ExprArith>
-[16] <ExprArith>	  -> <HpExpr> <LpExpr>
+[16] <ExprArith>	  -> <HpProd> <LpExpr>
 [17] <HpProd>		  -> <SimpleExpr> <HpExpr>
 [18] <HpExpr>		  -> <HpOp> <SimpleExpr> <HpExpr>
 [19] 			  -> EPSILON
