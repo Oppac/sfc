@@ -1,1 +1,1 @@
-# SFC
+# Super Fortran Compilator
