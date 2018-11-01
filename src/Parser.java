@@ -189,7 +189,13 @@ public class Parser {
     } else {
       //System.out.println("\nOk " + lookahead.getType() + " == " + token);
     }
-    nextToken();
+    if (tree) {
+      Symbol label = lookahead;
+      nextToken();
+      return new Parser(label);
+    } else {
+      nextToken();
+    }
   }
 
   public void startParse() throws IOException {
