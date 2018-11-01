@@ -1,4 +1,5 @@
 public enum LexicalUnit{
+    NONTERMINAL,
     BEGINPROG,
     PROGNAME,
     ENDLINE,
@@ -35,6 +36,5 @@ public enum LexicalUnit{
     ENDFOR,
     PRINT,
     READ,
-    EOS,
-    NONTERMINAL
+    EOS
 }
