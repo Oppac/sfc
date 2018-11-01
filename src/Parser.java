@@ -5,67 +5,176 @@ import java.io.IOException;
 public class Parser {
   private Lexer scanner;
   private Symbol lookahead;
+  public boolean verbose = false;
 
-  private static final int PROGRAM = 1;
-  private static final int EPSILON = 2;
-  private static final int VARIABLES = 3;
-  private static final int VARIABLES_EPSILON = 4;
-  private static final int VARLIST = 5;
-  private static final int VARLISTEND = 6;
-  private static final int VARLISTEND_EPSILON = 7;
-  private static final int CODE = 8;
-  private static final int INSTRUCTION_ASSIGN = 9;
-  private static final int INSTRUCTION_IF = 10;
-  private static final int INSTRUCTION_WHILE = 11;
-  private static final int INSTRUCTION_FOR = 12;
-  private static final int INSTRUCTION_PRINT = 13;
-  private static final int INSTRUCTION_READ = 14;
-  private static final int ASSIGN = 15;
-  private static final int EXPRARITH = 16;
-  private static final int HPPROD = 17;
-  private static final int HPEXPR = 18;
-  private static final int HPEXPR_EPSILON = 19;
-  private static final int LPEXPR = 20;
-  private static final int LPEXPR_EPSILON = 21;
-  private static final int SIMPLEEXPR_VARNAME = 22;
-  private static final int SIMPLEEXPR_NUMBER = 23;
-  private static final int SIMPLEEXPR_PAREN = 24;
-  private static final int SIMPLEEXPR_MINUS = 25;
-  private static final int LPOP_PLUS = 26;
-  private static final int LPOP_MINUS = 27;
-  private static final int HPOP_TIMES = 28;
-  private static final int HPOP_DIVIDE = 29;
-  private static final int IF = 30;
-  private static final int IFELSE = 31;
-  private static final int IFELSE_EPSILON = 32;
-  private static final int COND = 33;
-  private static final int PCOND = 34;
-  private static final int HPCOND_AND = 35;
-  private static final int HPCOND_EPSILON = 36;
-  private static final int LPCOND_OR = 37;
-  private static final int LPCOND_EPSILON = 38;
-  private static final int SIMPLECOND_NOT = 39;
-  private static final int SIMPLECOND_COMP = 40;
-  private static final int COMP_EQ = 41;
-  private static final int COMP_GEQ = 42;
-  private static final int COMP_GT = 43;
-  private static final int COMP_LEQ = 44;
-  private static final int COMP_LT = 45;
-  private static final int COMP_NEQ = 46;
-  private static final int WHILE = 47;
-  private static final int FOR = 48;
-  private static final int PRINT = 49;
-  private static final int READ = 50;
-  private static final int EXPLIST = 51;
-  private static final int EXPLISTEND = 52;
-  private static final int EXPLISTEND_EPSILON = 53;
+  private static String PROGRAM;
+  private static String EPSILON;
+  private static String VARIABLES;
+  private static String VARIABLES_EPSILON;
+  private static String VARLIST;
+  private static String VARLISTEND;
+  private static String VARLISTEND_EPSILON;
+  private static String CODE;
+  private static String INSTRUCTION_ASSIGN;
+  private static String INSTRUCTION_IF;
+  private static String INSTRUCTION_WHILE;
+  private static String INSTRUCTION_FOR;
+  private static String INSTRUCTION_PRINT;
+  private static String INSTRUCTION_READ;
+  private static String ASSIGN;
+  private static String EXPRARITH;
+  private static String HPPROD;
+  private static String HPEXPR;
+  private static String HPEXPR_EPSILON;
+  private static String LPEXPR;
+  private static String LPEXPR_EPSILON;
+  private static String SIMPLEEXPR_VARNAME;
+  private static String SIMPLEEXPR_NUMBER;
+  private static String SIMPLEEXPR_PAREN;
+  private static String SIMPLEEXPR_MINUS;
+  private static String LPOP_PLUS;
+  private static String LPOP_MINUS;
+  private static String HPOP_TIMES;
+  private static String HPOP_DIVIDE;
+  private static String IF;
+  private static String IFELSE;
+  private static String IFELSE_EPSILON;
+  private static String COND;
+  private static String PCOND;
+  private static String HPCOND_AND;
+  private static String HPCOND_EPSILON;
+  private static String LPCOND_OR;
+  private static String LPCOND_EPSILON;
+  private static String SIMPLECOND_NOT;
+  private static String SIMPLECOND_COMP;
+  private static String COMP_EQ;
+  private static String COMP_GEQ;
+  private static String COMP_GT;
+  private static String COMP_LEQ;
+  private static String COMP_LT;
+  private static String COMP_NEQ;
+  private static String WHILE;
+  private static String FOR;
+  private static String PRINT;
+  private static String READ;
+  private static String EXPLIST;
+  private static String EXPLISTEND;
+  private static String EXPLISTEND_EPSILON;
 
-
-  public static boolean VERBOSE = false;
-
-  public Parser(BufferedReader filePath) throws IOException {
+  public Parser(BufferedReader filePath, boolean v) throws IOException {
     this.scanner = new Lexer(filePath);
     this.lookahead = scanner.yylex();
+    this.verbose = v;
+
+    if (verbose) {
+      this.PROGRAM = " PROGRAM ";
+      this.EPSILON = "EPSILON ";
+      this.VARIABLES = "VARIABLES ";
+      this.VARIABLES_EPSILON = "VARIABLES_EPSILON ";
+      this.VARLIST = "VARLIST ";
+      this.VARLISTEND = "VARLISTEND " ;
+      this.VARLISTEND_EPSILON = "VARLISTEND_EPSILON ";
+      this.CODE = "CODE ";
+      this.INSTRUCTION_ASSIGN = "INSTRUCTION_ASSIGN ";
+      this.INSTRUCTION_IF = "INSTRUCTION_IF ";
+      this.INSTRUCTION_WHILE = "INSTRUCTION_WHILE ";
+      this.INSTRUCTION_FOR = "INSTRUCTION_FOR ";
+      this.INSTRUCTION_PRINT = "INSTRUCTION_PRINT ";
+      this.INSTRUCTION_READ = "INSTRUCTION_READ ";
+      this.ASSIGN = "ASSIGN ";
+      this.EXPRARITH = "EXPRARITH ";
+      this.HPPROD = "HPPROD ";
+      this.HPEXPR = "HPEXPR ";
+      this.HPEXPR_EPSILON = "HPEXPR_EPSILON ";
+      this.LPEXPR = "LPEXPR ";
+      this.LPEXPR_EPSILON = "LPEXPR_EPSILON ";
+      this.SIMPLEEXPR_VARNAME = "SIMPLEEXPR_VARNAME ";
+      this.SIMPLEEXPR_NUMBER = "SIMPLEEXPR_NUMBER ";
+      this.SIMPLEEXPR_PAREN = "SIMPLEEXPR_PAREN ";
+      this.SIMPLEEXPR_MINUS = "SIMPLEEXPR_MINUS ";
+      this.LPOP_PLUS = "LPOP_PLUS ";
+      this.LPOP_MINUS = "LPOP_MINUS ";
+      this.HPOP_TIMES = "HPOP_TIMES ";
+      this.HPOP_DIVIDE = "HPOP_DIVIDE ";
+      this.IF = "IF ";
+      this.IFELSE = "IFELSE ";
+      this.IFELSE_EPSILON = "IFELSE_EPSILON ";
+      this.COND = "COND ";
+      this.PCOND = "PCOND ";
+      this.HPCOND_AND = "HPCOND_AND ";
+      this.HPCOND_EPSILON = "HPCOND_EPSILON ";
+      this.LPCOND_OR = "LPCOND_OR ";
+      this.LPCOND_EPSILON = "LPCOND_EPSILON ";
+      this.SIMPLECOND_NOT = "SIMPLECOND_NOT ";
+      this.SIMPLECOND_COMP = "SIMPLECOND_COMP ";
+      this.COMP_EQ = "COMP_EQ ";
+      this.COMP_GEQ = "COMP_GEQ ";
+      this.COMP_GT = "COMP_GT ";
+      this.COMP_LEQ = "COMP_LEQ ";
+      this.COMP_LT = "COMP_LT ";
+      this.COMP_NEQ = "COMP_NEQ ";
+      this.WHILE = "WHILE ";
+      this.FOR = "FOR ";
+      this.PRINT = "PRINT ";
+      this.READ = "READ ";
+      this.EXPLIST = "EXPLIST ";
+      this.EXPLISTEND = "EXPLISTEND ";
+      this.EXPLISTEND_EPSILON = "EXPLISTEND_EPSILON ";
+    } else {
+      this.PROGRAM = " 1 ";
+      this.EPSILON = "2 ";
+      this.VARIABLES = "3 ";
+      this.VARIABLES_EPSILON = "4 ";
+      this.VARLIST = "5 ";
+      this.VARLISTEND = "6 ";
+      this.VARLISTEND_EPSILON = "7 ";
+      this.CODE = "8 ";
+      this.INSTRUCTION_ASSIGN = "9 ";
+      this.INSTRUCTION_IF = "10 ";
+      this.INSTRUCTION_WHILE = "11 ";
+      this.INSTRUCTION_FOR = "12 ";
+      this.INSTRUCTION_PRINT = "13 ";
+      this.INSTRUCTION_READ = "14 ";
+      this.ASSIGN = "15 ";
+      this.EXPRARITH = "16 ";
+      this.HPPROD = "17 ";
+      this.HPEXPR = "18 ";
+      this.HPEXPR_EPSILON = "19 ";
+      this.LPEXPR = "20 ";
+      this.LPEXPR_EPSILON = "21 ";
+      this.SIMPLEEXPR_VARNAME = "22 ";
+      this.SIMPLEEXPR_NUMBER = "23 ";
+      this.SIMPLEEXPR_PAREN = "24 ";
+      this.SIMPLEEXPR_MINUS = "25 ";
+      this.LPOP_PLUS = "26 ";
+      this.LPOP_MINUS = "27 ";
+      this.HPOP_TIMES = "28 ";
+      this.HPOP_DIVIDE = "29 ";
+      this.IF = "30 ";
+      this.IFELSE = "31 ";
+      this.IFELSE_EPSILON = "32 ";
+      this.COND = "33 ";
+      this.PCOND = "34 ";
+      this.HPCOND_AND = "35 ";
+      this.HPCOND_EPSILON = "36 ";
+      this.LPCOND_OR = "37 ";
+      this.LPCOND_EPSILON = "38 ";
+      this.SIMPLECOND_NOT = "39 ";
+      this.SIMPLECOND_COMP = "40 ";
+      this.COMP_EQ = "41 ";
+      this.COMP_GEQ = "42 ";
+      this.COMP_GT = "43 ";
+      this.COMP_LEQ = "44 ";
+      this.COMP_LT = "45 ";
+      this.COMP_NEQ = "46 ";
+      this.WHILE = "47 ";
+      this.FOR = "48 ";
+      this.PRINT = "49 ";
+      this.READ = "50 ";
+      this.EXPLIST = "51 ";
+      this.EXPLISTEND = "52 ";
+      this.EXPLISTEND_EPSILON = "53 ";
+    }
   }
 
   private void nextToken() throws IOException {
@@ -94,7 +203,7 @@ public class Parser {
 
   private void program() throws IOException {
     skipEndline();
-    System.out.print(" " + PROGRAM + " ");
+    System.out.print(PROGRAM);
     compareToken(LexicalUnit.BEGINPROG);
     compareToken(LexicalUnit.PROGNAME);
     compareToken(LexicalUnit.ENDLINE);
@@ -110,7 +219,7 @@ public class Parser {
 
   private void variables() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.VARIABLES)) {
-      System.out.print(VARIABLES + " ");
+      System.out.print(VARIABLES);
       compareToken(LexicalUnit.VARIABLES);
       varlist();
     } else {
@@ -119,19 +228,19 @@ public class Parser {
   }
 
   private void varlist() throws IOException {
-    System.out.print(VARLIST + " ");
+    System.out.print(VARLIST);
     compareToken(LexicalUnit.VARNAME);
     varlistend();
   }
 
   private void varlistend() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.COMMA)) {
-      System.out.print(VARLISTEND + " ");
+      System.out.print(VARLISTEND);
       compareToken(LexicalUnit.COMMA);
       compareToken(LexicalUnit.VARNAME);
       varlistend();
     } else {
-     System.out.print(VARLISTEND_EPSILON + " ");
+     System.out.print(VARLISTEND_EPSILON);
    }
   }
 
@@ -143,7 +252,7 @@ public class Parser {
       case FOR:
       case PRINT:
       case READ:
-        System.out.print(CODE + " ");
+        System.out.print(CODE);
         instruction();
         if (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
           skipEndline();
@@ -156,47 +265,47 @@ public class Parser {
   private void instruction() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
-        System.out.print(INSTRUCTION_ASSIGN + " ");
+        System.out.print(INSTRUCTION_ASSIGN);
         assign();
         break;
       case IF:
-        System.out.print(INSTRUCTION_IF + " ");
+        System.out.print(INSTRUCTION_IF);
         parse_if();
         break;
       case WHILE:
-        System.out.print(INSTRUCTION_WHILE + " ");
+        System.out.print(INSTRUCTION_WHILE);
         parse_while();
         break;
       case FOR:
-        System.out.print(INSTRUCTION_FOR + " ");
+        System.out.print(INSTRUCTION_FOR);
         parse_for();
         break;
       case PRINT:
-        System.out.print(INSTRUCTION_PRINT + " ");
+        System.out.print(INSTRUCTION_PRINT);
         parse_print();
         break;
       case READ:
-        System.out.print(INSTRUCTION_READ + " ");
+        System.out.print(INSTRUCTION_READ);
         parse_read();
         break;
     }
   }
 
   private void assign() throws IOException {
-    System.out.print(ASSIGN + " ");
+    System.out.print(ASSIGN);
     compareToken(LexicalUnit.VARNAME);
     compareToken(LexicalUnit.ASSIGN);
     exprArith();
   }
 
   private void exprArith() throws IOException {
-    System.out.print(EXPRARITH + " ");
+    System.out.print(EXPRARITH);
     hpProd();
     lpExpr();
   }
 
   private void hpProd() throws IOException {
-    System.out.print(HPPROD + " ");
+    System.out.print(HPPROD);
     simpleExpr();
     hpExpr();
   }
@@ -204,43 +313,44 @@ public class Parser {
   private void hpExpr() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.TIMES) ||
         lookahead.getType().equals(LexicalUnit.DIVIDE)) {
-          System.out.print(HPEXPR + " ");
+          System.out.print(HPEXPR);
           hpOp();
           simpleExpr();
           hpExpr();
     } else {
-      System.out.print(HPEXPR_EPSILON + " ");
+      System.out.print(HPEXPR_EPSILON);
     }
   }
 
   private void lpExpr() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.PLUS) ||
         lookahead.getType().equals(LexicalUnit.MINUS)) {
+        System.out.print(LPEXPR);
         lpOp();
         hpProd();
     } else {
-      System.out.print(LPEXPR_EPSILON + " ");
+      System.out.print(LPEXPR_EPSILON);
     }
   }
 
   private void simpleExpr() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
-        System.out.print(SIMPLEEXPR_VARNAME + " ");
+        System.out.print(SIMPLEEXPR_VARNAME);
         nextToken();
         break;
       case NUMBER:
-        System.out.print(SIMPLEEXPR_NUMBER + " ");
+        System.out.print(SIMPLEEXPR_NUMBER);
         nextToken();
         break;
       case LPAREN:
-        System.out.print(SIMPLEEXPR_PAREN + " ");
+        System.out.print(SIMPLEEXPR_PAREN);
         nextToken();
         exprArith();
         compareToken(LexicalUnit.RPAREN);
         break;
       case MINUS:
-        System.out.print(SIMPLEEXPR_MINUS + " ");
+        System.out.print(SIMPLEEXPR_MINUS);
         nextToken();
         exprArith();
         break;
@@ -249,25 +359,25 @@ public class Parser {
 
   private void hpOp() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.TIMES)) {
-      System.out.print(HPOP_TIMES + " ");
+      System.out.print(HPOP_TIMES);
       nextToken();
     } else if (lookahead.getType().equals(LexicalUnit.DIVIDE)) {
-      System.out.print(HPOP_DIVIDE + " ");
+      System.out.print(HPOP_DIVIDE);
       nextToken();
     }
   }
 
   private void lpOp() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.PLUS)) {
-      System.out.print(LPOP_PLUS + " ");
+      System.out.print(LPOP_PLUS);
       nextToken();
     } else if (lookahead.getType().equals(LexicalUnit.MINUS)) {
-      System.out.print(LPOP_MINUS + " ");
+      System.out.print(LPOP_MINUS);
     }
   }
 
   private void parse_if() throws IOException {
-    System.out.print(IF + " ");
+    System.out.print(IF);
     compareToken(LexicalUnit.IF);
     compareToken(LexicalUnit.LPAREN);
     cond();
@@ -281,46 +391,46 @@ public class Parser {
 
   private void ifElse() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.ELSE)) {
-      System.out.print(IFELSE + " ");
+      System.out.print(IFELSE);
       compareToken(LexicalUnit.ELSE);
       compareToken(LexicalUnit.ENDLINE);
       code();
     } else {
-      System.out.print(IFELSE_EPSILON + " ");
+      System.out.print(IFELSE_EPSILON);
     }
   }
 
   private void cond() throws IOException {
-    System.out.print(COND + " ");
+    System.out.print(COND);
     pCond();
     lpCond();
   }
 
   private void pCond() throws IOException {
-    System.out.print(PCOND + " ");
+    System.out.print(PCOND);
     simpleCond();
     hpCond();
   }
 
   private void hpCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.AND)) {
-          System.out.print(HPCOND_AND + " ");
+          System.out.print(HPCOND_AND);
           compareToken(LexicalUnit.AND);
           simpleCond();
           hpCond();
     } else {
-      System.out.print(HPCOND_EPSILON + " ");
+      System.out.print(HPCOND_EPSILON);
     }
   }
 
   private void lpCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.OR)) {
-      System.out.print(LPCOND_OR + " ");
+      System.out.print(LPCOND_OR);
       compareToken(LexicalUnit.OR);
       pCond();
       lpCond();
     } else {
-      System.out.print(LPCOND_EPSILON + " ");
+      System.out.print(LPCOND_EPSILON);
     }
   }
 
@@ -339,34 +449,34 @@ public class Parser {
   private void comp() throws IOException {
     switch(lookahead.getType()) {
       case EQ:
-        System.out.print(COMP_EQ + " ");
+        System.out.print(COMP_EQ);
         compareToken(LexicalUnit.EQ);
         break;
       case GEQ:
-        System.out.print(COMP_GEQ + " ");
+        System.out.print(COMP_GEQ);
         compareToken(LexicalUnit.GEQ);
         break;
       case GT:
-        System.out.print(COMP_GT + " ");
+        System.out.print(COMP_GT);
         compareToken(LexicalUnit.GT);
         break;
       case LEQ:
-        System.out.print(COMP_LEQ + " ");
+        System.out.print(COMP_LEQ);
         compareToken(LexicalUnit.LEQ);
         break;
       case LT:
-        System.out.print(COMP_LT + " ");
+        System.out.print(COMP_LT);
         compareToken(LexicalUnit.LT);
         break;
       case NEQ:
-        System.out.print(COMP_NEQ + " ");
+        System.out.print(COMP_NEQ);
         compareToken(LexicalUnit.NEQ);
         break;
     }
   }
 
   private void parse_while() throws IOException {
-    System.out.print(WHILE + " ");
+    System.out.print(WHILE);
     compareToken(LexicalUnit.WHILE);
     cond();
     compareToken(LexicalUnit.DO);
@@ -376,7 +486,7 @@ public class Parser {
   }
 
   private void parse_for() throws IOException {
-    System.out.print(FOR + " ");
+    System.out.print(FOR);
     compareToken(LexicalUnit.FOR);
     compareToken(LexicalUnit.VARNAME);
     compareToken(LexicalUnit.ASSIGN);
@@ -390,7 +500,7 @@ public class Parser {
   }
 
   private void parse_print() throws IOException {
-    System.out.print(PRINT + " ");
+    System.out.print(PRINT);
     compareToken(LexicalUnit.PRINT);
     compareToken(LexicalUnit.LPAREN);
     exprList();
@@ -398,7 +508,7 @@ public class Parser {
   }
 
   private void parse_read() throws IOException {
-    System.out.print(READ + " ");
+    System.out.print(READ);
     compareToken(LexicalUnit.READ);
     compareToken(LexicalUnit.LPAREN);
     varlist();
@@ -406,18 +516,18 @@ public class Parser {
   }
 
   private void exprList() throws IOException {
-    System.out.print(EXPLIST + " ");
+    System.out.print(EXPLIST);
     exprArith();
     expListEnd();
   }
 
   private void expListEnd() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.COMMA)) {
-      System.out.print(EXPLISTEND + " ");
+      System.out.print(EXPLISTEND);
       compareToken(LexicalUnit.COMMA);
       exprList();
     } else {
-      System.out.print(EXPLISTEND_EPSILON + " ");
+      System.out.print(EXPLISTEND_EPSILON);
     }
   }
 

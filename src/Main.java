@@ -11,21 +11,21 @@ public class Main {
   *
   */
   public static void main(String[] args) {
+    boolean verbose = false;
     if (args.length < 1) {
       System.out.println("Please enter a file to compile");
-    } else if (args.length > 1) {
-      System.out.println("Please enter only one file");
+    } else if (args.length > 1 && args[1].equals("-v")) {
+      verbose = true;
+      startCompilation(args[0], verbose);
     } else {
-      for (String filePath : args) {
-        startCompilation(filePath);
-      }
+      startCompilation(args[0], verbose);
     }
   }
 
-  private static void startCompilation(String filePath) {
+  private static void startCompilation(String filePath, boolean verbose) {
     try {
       //Generated lexer
-      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)));
+      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose);
       parser.startParse();
 
     } catch (Exception e) {
