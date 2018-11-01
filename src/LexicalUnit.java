@@ -35,5 +35,6 @@ public enum LexicalUnit{
     ENDFOR,
     PRINT,
     READ,
-    EOS
+    EOS,
+    NONTERMINAL
 }

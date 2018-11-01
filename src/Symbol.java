@@ -29,6 +29,10 @@ public class Symbol{
 		this(unit,UNDEFINED_POSITION,UNDEFINED_POSITION,value);
 	}
 
+	public Symbol(String nonTerm) {
+		this(LexicalUnit.NONTERMINAL, UNDEFINED_POSITION, UNDEFINED_POSITION, nonTerm);
+	}
+
 	public boolean isTerminal(){
 		return this.type != null;
 	}

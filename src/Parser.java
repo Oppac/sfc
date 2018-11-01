@@ -5,7 +5,8 @@ import java.io.IOException;
 public class Parser {
   private Lexer scanner;
   private Symbol lookahead;
-  public boolean verbose = false;
+  public boolean verbose;
+  public boolean tree;
 
   private static String PROGRAM;
   private static String EPSILON;
@@ -61,10 +62,11 @@ public class Parser {
   private static String EXPLISTEND;
   private static String EXPLISTEND_EPSILON;
 
-  public Parser(BufferedReader filePath, boolean v) throws IOException {
+  public Parser(BufferedReader filePath, boolean v, boolean tree) throws IOException {
     this.scanner = new Lexer(filePath);
     this.lookahead = scanner.yylex();
     this.verbose = v;
+    this.tree = tree;
 
     if (verbose) {
       this.PROGRAM = " PROGRAM ";
@@ -223,7 +225,7 @@ public class Parser {
       compareToken(LexicalUnit.VARIABLES);
       varlist();
     } else {
-      System.out.print(VARIABLES_EPSILON + " ");
+      System.out.print(VARIABLES_EPSILON);
     }
   }
 

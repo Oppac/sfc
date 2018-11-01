@@ -12,20 +12,23 @@ public class Main {
   */
   public static void main(String[] args) {
     boolean verbose = false;
+    boolean tree = false;
+    
     if (args.length < 1) {
       System.out.println("Please enter a file to compile");
-    } else if (args.length > 1 && args[1].equals("-v")) {
-      verbose = true;
-      startCompilation(args[0], verbose);
-    } else {
-      startCompilation(args[0], verbose);
     }
+    if (args.length > 1 && args[1].equals("-v")) {
+      verbose = true;
+    } else if (args.length > 1 && args[2].equals("-wt")){
+      tree = true;
+    }
+    startCompilation(args[0], verbose, tree);
   }
 
-  private static void startCompilation(String filePath, boolean verbose) {
+  private static void startCompilation(String filePath, boolean verbose, boolean tree) {
     try {
       //Generated lexer
-      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose);
+      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose, tree);
       parser.startParse();
 
     } catch (Exception e) {
