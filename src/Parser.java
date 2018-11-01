@@ -6,7 +6,6 @@ public class Parser {
   private Lexer scanner;
   private Symbol lookahead;
   public boolean verbose;
-  public boolean tree;
 
   private static String PROGRAM;
   private static String EPSILON;
@@ -62,11 +61,10 @@ public class Parser {
   private static String EXPLISTEND;
   private static String EXPLISTEND_EPSILON;
 
-  public Parser(BufferedReader filePath, boolean v, boolean tree) throws IOException {
+  public Parser(BufferedReader filePath, boolean v) throws IOException {
     this.scanner = new Lexer(filePath);
     this.lookahead = scanner.yylex();
     this.verbose = v;
-    this.tree = tree;
 
     if (verbose) {
       this.PROGRAM = " PROGRAM ";
@@ -189,13 +187,7 @@ public class Parser {
     } else {
       //System.out.println("\nOk " + lookahead.getType() + " == " + token);
     }
-    if (tree) {
-      Symbol label = lookahead;
-      nextToken();
-      return new Parser(label);
-    } else {
-      nextToken();
-    }
+    nextToken();
   }
 
   public void startParse() throws IOException {
