@@ -1,1 +1,1 @@
-# Super Fortran Compilator Borel
+# Super Fortran Compilator
