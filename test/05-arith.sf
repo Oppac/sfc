@@ -1,4 +1,3 @@
-// Incorrect program to test errors
 
 
 BEGINPROG Arith
@@ -11,11 +10,10 @@ BEGINPROG Arith
   c := ((5 + 4) * 2) / 1
   a := a + b / c
 
-
-  PRINT (a, b , c, 5, (2 + 2))
-
-  WHILE a > b DO
-  a
-  ENDWHILE 
+  PRINT(a, b, c, 5, (2 + 2))
 
 ENDPROG
+
+
+
+

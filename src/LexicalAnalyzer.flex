@@ -6,9 +6,9 @@ import java.util.Map;
 
 %class Lexer
 %unicode
-%standalone
 %line
 %column
+%type Symbol
 
 %{
 
@@ -36,7 +36,7 @@ import java.util.Map;
   //Print then return the symbol
   public static Symbol token(LexicalUnit tokenType, int line, int column, Object value) {
     Symbol sym = new Symbol(tokenType, line, column, value);
-    printToken(sym);
+    //printToken(sym);
     return(sym);
   }
 
@@ -83,9 +83,14 @@ import java.util.Map;
 
 %}
 
+%eofval{
+  return token(LexicalUnit.EOS, yyline, yycolumn, yytext());
+%eofval}
+
 %eof{
-  printTable();
+  //printTable();
 %eof}
+
 
 digits           = [0-9]
 lower_letters    = [a-z]
@@ -113,53 +118,53 @@ BlankSpace       = [\ \t\f]
 %%
 
 <YYINITIAL> {
-  {VarName}       {token(LexicalUnit.VARNAME, yyline, yycolumn, yytext());
-                   table(yytext(), yyline);
+  {VarName}       { table(yytext(), yyline);
+                    return token(LexicalUnit.VARNAME, yyline, yycolumn, yytext());
                   }
-  {Number}        {token(LexicalUnit.NUMBER, yyline, yycolumn, yytext());}
-  {ProgName}      {token(LexicalUnit.PROGNAME, yyline, yycolumn, yytext());}
-  {Endline}       {token(LexicalUnit.ENDLINE, yyline, yycolumn, yytext());}
+  {Number}        {return token(LexicalUnit.NUMBER, yyline, yycolumn, yytext());}
+  {ProgName}      {return token(LexicalUnit.PROGNAME, yyline, yycolumn, yytext());}
+  {Endline}       {return token(LexicalUnit.ENDLINE, yyline, yycolumn, yytext());}
 
-  "BEGINPROG"     {token(LexicalUnit.BEGINPROG, yyline, yycolumn, yytext());}
-  "ENDPROG"       {token(LexicalUnit.ENDPROG, yyline, yycolumn, yytext());}
-  "VARIABLES"     {token(LexicalUnit.VARIABLES, yyline, yycolumn, yytext());}
+  "BEGINPROG"     {return token(LexicalUnit.BEGINPROG, yyline, yycolumn, yytext());}
+  "ENDPROG"       {return token(LexicalUnit.ENDPROG, yyline, yycolumn, yytext());}
+  "VARIABLES"     {return token(LexicalUnit.VARIABLES, yyline, yycolumn, yytext());}
 
-  "PRINT"         {token(LexicalUnit.PRINT, yyline, yycolumn, yytext());}
-  "READ"          {token(LexicalUnit.READ, yyline, yycolumn, yytext());}
+  "PRINT"         {return token(LexicalUnit.PRINT, yyline, yycolumn, yytext());}
+  "READ"          {return token(LexicalUnit.READ, yyline, yycolumn, yytext());}
 
-  "IF"            {token(LexicalUnit.IF, yyline, yycolumn, yytext());}
-  "THEN"          {token(LexicalUnit.THEN, yyline, yycolumn, yytext());}
-  "ELSE"          {token(LexicalUnit.ELSE, yyline, yycolumn, yytext());}
-  "ENDIF"         {token(LexicalUnit.ENDIF, yyline, yycolumn, yytext());}
+  "IF"            {return token(LexicalUnit.IF, yyline, yycolumn, yytext());}
+  "THEN"          {return token(LexicalUnit.THEN, yyline, yycolumn, yytext());}
+  "ELSE"          {return token(LexicalUnit.ELSE, yyline, yycolumn, yytext());}
+  "ENDIF"         {return token(LexicalUnit.ENDIF, yyline, yycolumn, yytext());}
 
-  "WHILE"         {token(LexicalUnit.WHILE, yyline, yycolumn, yytext());}
-  "DO"            {token(LexicalUnit.DO, yyline, yycolumn, yytext());}
-  "ENDWHILE"      {token(LexicalUnit.ENDWHILE, yyline, yycolumn, yytext());}
+  "WHILE"         {return token(LexicalUnit.WHILE, yyline, yycolumn, yytext());}
+  "DO"            {return token(LexicalUnit.DO, yyline, yycolumn, yytext());}
+  "ENDWHILE"      {return token(LexicalUnit.ENDWHILE, yyline, yycolumn, yytext());}
 
-  "FOR"           {token(LexicalUnit.FOR, yyline, yycolumn, yytext());}
-  "TO"            {token(LexicalUnit.TO, yyline, yycolumn, yytext());}
-  "ENDFOR"        {token(LexicalUnit.ENDFOR, yyline, yycolumn, yytext());}
+  "FOR"           {return token(LexicalUnit.FOR, yyline, yycolumn, yytext());}
+  "TO"            {return token(LexicalUnit.TO, yyline, yycolumn, yytext());}
+  "ENDFOR"        {return token(LexicalUnit.ENDFOR, yyline, yycolumn, yytext());}
 
-  ","             {token(LexicalUnit.COMMA, yyline, yycolumn, yytext());}
-  ":="            {token(LexicalUnit.ASSIGN, yyline, yycolumn, yytext());}
-  "("             {token(LexicalUnit.LPAREN, yyline, yycolumn, yytext());}
-  ")"             {token(LexicalUnit.RPAREN, yyline, yycolumn, yytext());}
+  ","             {return token(LexicalUnit.COMMA, yyline, yycolumn, yytext());}
+  ":="            {return token(LexicalUnit.ASSIGN, yyline, yycolumn, yytext());}
+  "("             {return token(LexicalUnit.LPAREN, yyline, yycolumn, yytext());}
+  ")"             {return token(LexicalUnit.RPAREN, yyline, yycolumn, yytext());}
 
-  "-"             {token(LexicalUnit.MINUS, yyline, yycolumn, yytext());}
-  "+"             {token(LexicalUnit.PLUS, yyline, yycolumn, yytext());}
-  "*"             {token(LexicalUnit.TIMES, yyline, yycolumn, yytext());}
-  "/"             {token(LexicalUnit.DIVIDE, yyline, yycolumn, yytext());}
+  "-"             {return token(LexicalUnit.MINUS, yyline, yycolumn, yytext());}
+  "+"             {return token(LexicalUnit.PLUS, yyline, yycolumn, yytext());}
+  "*"             {return token(LexicalUnit.TIMES, yyline, yycolumn, yytext());}
+  "/"             {return token(LexicalUnit.DIVIDE, yyline, yycolumn, yytext());}
 
-  "AND"           {token(LexicalUnit.AND, yyline, yycolumn, yytext());}
-  "OR"            {token(LexicalUnit.OR, yyline, yycolumn, yytext());}
-  "NOT"           {token(LexicalUnit.NOT, yyline, yycolumn, yytext());}
+  "AND"           {return token(LexicalUnit.AND, yyline, yycolumn, yytext());}
+  "OR"            {return token(LexicalUnit.OR, yyline, yycolumn, yytext());}
+  "NOT"           {return token(LexicalUnit.NOT, yyline, yycolumn, yytext());}
 
-  "="             {token(LexicalUnit.EQ, yyline, yycolumn, yytext());}
-  ">="            {token(LexicalUnit.GEQ, yyline, yycolumn, yytext());}
-  ">"             {token(LexicalUnit.GT, yyline, yycolumn, yytext());}
-  "<="            {token(LexicalUnit.LEQ, yyline, yycolumn, yytext());}
-  "<"             {token(LexicalUnit.LT, yyline, yycolumn, yytext());}
-  "<>"            {token(LexicalUnit.NEQ, yyline, yycolumn, yytext());}
+  "="             {return token(LexicalUnit.EQ, yyline, yycolumn, yytext());}
+  ">="            {return token(LexicalUnit.GEQ, yyline, yycolumn, yytext());}
+  ">"             {return token(LexicalUnit.GT, yyline, yycolumn, yytext());}
+  "<="            {return token(LexicalUnit.LEQ, yyline, yycolumn, yytext());}
+  "<"             {return token(LexicalUnit.LT, yyline, yycolumn, yytext());}
+  "<>"            {return token(LexicalUnit.NEQ, yyline, yycolumn, yytext());}
 
   //Specific error for misspelled comparator
   "=>"            {syntaxError(yyline, yytext());}

@@ -29,12 +29,32 @@ public class Symbol{
 		this(unit,UNDEFINED_POSITION,UNDEFINED_POSITION,value);
 	}
 
+	public Symbol(String nonTerm) {
+		this(LexicalUnit.NONTERMINAL, UNDEFINED_POSITION, UNDEFINED_POSITION, nonTerm);
+	}
+
 	public boolean isTerminal(){
-		return this.type != null;
+		return !this.type.equals(LexicalUnit.NONTERMINAL);
 	}
 
 	public boolean isNonTerminal(){
-		return this.type == null;
+		return this.type.equals(LexicalUnit.NONTERMINAL);
+	}
+
+	public boolean isEpsilon() {
+		return this.value.equals("EPSILON");
+	}
+
+	public boolean isEOS() {
+		return this.type.equals(LexicalUnit.EOS);
+	}
+
+	public String toTeX() {
+			if (this.isEpsilon()){
+					return "$\\varepsilon$";
+			} else {
+				return this.value.toString();
+			}
 	}
 
 	public LexicalUnit getType(){
@@ -69,4 +89,6 @@ public class Symbol{
 		}
 		return "Non-terminal symbol";
 	}
+
+
 }

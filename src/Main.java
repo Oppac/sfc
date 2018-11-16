@@ -11,25 +11,55 @@ public class Main {
   *
   */
   public static void main(String[] args) {
-    if (args.length < 1) {
-      System.out.println("Please enter a file to compile");
-    } else if (args.length > 1) {
-      System.out.println("Please enter only one file");
-    } else {
-      for (String filePath : args) {
-        startCompilation(filePath);
+    boolean verbose = false;
+    boolean tree = false;
+
+    if (args.length < 1 || args.length > 4) {
+      System.out.println("Usage: java -jar Part2.jar (-v) (-wt output.tex) input.sf");
+    }
+
+    if (args.length > 1 && args[0].equals("-v")) {
+      verbose = true;
+    }
+
+    if (args.length > 1 && args[0].equals("-wt")) {
+      try {
+        tree = true;
+        drawTree(args[1]);
+      } catch (Exception e) {
+        System.out.println("Please specify a lex file to draw the tree");
+      }
+    } else if (args.length > 1 && args[1].equals("-wt")) {
+      if (args[0].equals("-v")) {
+        verbose = true;
+      } else {
+        System.out.println("Usage: java -jar Part2.jar (-v) (-wt output.tex) input.sf");
+      }
+      try {
+        tree = true;
+        drawTree(args[2]);
+      } catch (Exception e) {
+        System.out.println("Please specify a lex file to draw the tree");
       }
     }
+    startCompilation(args[(args.length)-1], verbose, tree);
   }
 
-  private static void startCompilation(String filePath) {
+  private static void startCompilation(String filePath, boolean verbose, boolean tree) {
     try {
-      //Generated lexer
-      Lexer scanner = new Lexer(new BufferedReader(new FileReader(filePath)));
-      //Output the result of the compilation
-      scanner.yylex();
+      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose, tree);
+      parser.startParse();
     } catch (Exception e) {
       System.err.println("Failed to compile " + filePath);
     }
   }
+
+  private static void drawTree(String filePath) {
+    try {
+      System.out.println("Drawing tree is not yet implemented");
+    } catch (Exception e) {
+      System.err.println("Failed to draw tree");
+    }
+  }
+
 }

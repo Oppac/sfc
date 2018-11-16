@@ -1,0 +1,55 @@
+Transformed Super-Fortran Grammar
+
+[01] <Program>            -> BEGINPROG [ProgName] [EndLine] <Variables> <Code> ENDPROG
+[02] <Variables>          -> VARIABLES <VarList> [EndLine]
+[03]			  -> EPSILON
+[04] <VarList>            -> [VarName] <VarListEnd>
+[05] <VarListEnd>         -> EPSILON
+[06]			  -> COMMA <VarList>
+[07] <Code>		  -> EPSILON
+[08]			  -> <Instruction> [EndLine] <Code>
+[09] <Instruction>	  -> <Assign>
+[10]			  -> <If>
+[11]			  -> <While>
+[12]			  -> <For>
+[13]			  -> <Print>
+[14]			  -> <Read>
+[15] <Assign>		  -> [VarName] ASSIGN <ExprArith>
+[16] <ExprArith>	  -> <HpProd> <LpExpr>
+[17] <HpProd>		  -> <SimpleExpr> <HpExpr>
+[18] <HpExpr>		  -> <HpOp> <SimpleExpr> <HpExpr>
+[19] 			  -> EPSILON
+[20] <LpExpr>		  -> <LpOp> <HpProd>
+[21] 			  -> EPSILON
+[22] <SimpleExpr>	  -> [VarName]
+[23] 			  -> [Number]
+[24]			  -> LPAREN <ExprArith> RPAREN
+[25]			  -> MINUS <SimpleExpr>
+[26] <LpOp>		  -> PLUS
+[27] 			  -> MINUS
+[28] <HpOp>		  -> TIMES
+[29] 			  -> DIVIDE
+[30] <If>		  -> IF <Cond> THEN <Code> <IfElse> ENDIF
+[31] <IfElse>		  -> ELSE [EndLine] <Code>
+[32]			  -> EPSILON
+[33] <Cond>		  -> <PCond> <LpCond>
+[34] <PCond>		  -> <SimpleCond> <HpCond>
+[35] <HpCond>		  -> AND <SimpleCond> <HpCond>
+[36] 			  -> EPSILON
+[37] <LpCond>		  -> OR <PCond> <LpCond>
+[38] 			  -> EPSILON
+[39] <SimpleCond>	  -> NOT <SimpleCond>
+[40]			  -> <ExprArith> <Comp> <ExprArith>
+[41] <Comp>	      	  -> EQ
+[42] 			  -> GEQ
+[43]			  -> GT
+[44]			  -> LEQ
+[45]			  -> LT
+[46]			  -> NEQ
+[47] <While>		  -> WHILE <Cond> DO <Code> ENDWHILE
+[48] <For>		  -> FOR [VarName] ASSIGN <ExprArith> TO <ExprArith> DO <Code> ENDFOR
+[49] <Print>		  -> PRINT LPAREN <ExprList> RPAREN
+[50] <Read>		  -> READ LPAREN <VarList> RPAREN
+[51] <ExpList>		  -> <ExprArith> <ExpListEnd>
+[52] <ExpListEnd>	  -> EPSILON
+[53] 			  -> COMMA <ExpList>

@@ -1,1 +1,6 @@
-READ(b)
+BEGINPROG Read
+  READ(b)
+ENDPROG
+
+
+

@@ -1,4 +1,5 @@
 public enum LexicalUnit{
+    NONTERMINAL,
     BEGINPROG,
     PROGNAME,
     ENDLINE,
