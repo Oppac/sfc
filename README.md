@@ -2,6 +2,6 @@
 Super Fortran Lexer and Parser
 
 TODO:
-* Link with the parse tree (ParserTree.java)
+* Fix the Parse Tree
 * Comment the code and Javadoc
 
