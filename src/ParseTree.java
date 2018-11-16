@@ -80,6 +80,7 @@ public class ParseTree {
         treeTikZ.append("}\n");
         for (ParseTree child: children) {
             treeTikZ.append("child { ");
+            System.out.println(child.label);
             treeTikZ.append(child.toTikZ());
             treeTikZ.append(" }\n");
         }

@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 public class Main {
 
@@ -13,6 +15,7 @@ public class Main {
   public static void main(String[] args) {
     boolean verbose = false;
     boolean tree = false;
+    String output = "None";
 
     if (args.length < 1 || args.length > 4) {
       System.out.println("Usage: java -jar Part2.jar (-v) (-wt output.tex) input.sf");
@@ -25,7 +28,7 @@ public class Main {
     if (args.length > 1 && args[0].equals("-wt")) {
       try {
         tree = true;
-        drawTree(args[1]);
+        output = args[1];
       } catch (Exception e) {
         System.out.println("Please specify a lex file to draw the tree");
       }
@@ -37,28 +40,32 @@ public class Main {
       }
       try {
         tree = true;
-        drawTree(args[2]);
+        output = args[2];
       } catch (Exception e) {
         System.out.println("Please specify a lex file to draw the tree");
       }
     }
-    startCompilation(args[(args.length)-1], verbose, tree);
+  startCompilation(args[(args.length)-1], verbose, tree, output);
   }
 
-  private static void startCompilation(String filePath, boolean verbose, boolean tree) {
+  private static void startCompilation(String filePath, boolean verbose, boolean tree, String output) {
     try {
       Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose, tree);
-      parser.startParse();
+      if (tree) {
+        ParseTree parserTree = parser.startParse();
+        try {
+          BufferedWriter outputFile = new BufferedWriter(new FileWriter(output));
+          outputFile.write(parserTree.toLaTeX());
+          outputFile.close();
+        } catch (Exception e) {
+          e.printStackTrace();
+          System.err.println("Failed to draw tree");
+        }
+      } else {
+        parser.startParse();
+      }
     } catch (Exception e) {
       System.err.println("Failed to compile " + filePath);
-    }
-  }
-
-  private static void drawTree(String filePath) {
-    try {
-      System.out.println("Drawing tree is not yet implemented");
-    } catch (Exception e) {
-      System.err.println("Failed to draw tree");
     }
   }
 

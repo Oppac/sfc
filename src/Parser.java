@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 
@@ -217,7 +216,7 @@ public class Parser {
     while (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
         nextToken();
     }
-    return null;
+    return new ParseTree("SkipLines");
   }
 
   private ParseTree program() throws IOException {
@@ -344,9 +343,15 @@ public class Parser {
             skipEndline();
             code();
           }
+          return null;
+        }
+      default:
+        if (active_tree) {
+          return new ParseTree("End");
+        } else {
+          return null;
         }
     }
-    return null;
   }
 
   private ParseTree instruction() throws IOException {

@@ -1,0 +1,485 @@
+\RequirePackage{luatex85}
+\documentclass{standalone}
+
+\usepackage{tikz}
+
+\usetikzlibrary{graphdrawing, graphdrawing.trees}
+
+\begin{document}
+
+\begin{tikzpicture}[tree layout]
+\node {Program}
+child { node {SkipLines}
+ }
+child { node {BEGINPROG}
+ }
+child { node {Arith}
+ }
+child { node {
+}
+ }
+child { node {SkipLines}
+ }
+child { node {Variables}
+child { node {VARIABLES}
+ }
+child { node {Varlist}
+child { node {a}
+ }
+child { node {Varlistend}
+child { node {,}
+ }
+child { node {b}
+ }
+child { node {Varlistend}
+child { node {,}
+ }
+child { node {c}
+ }
+child { node {Varlistend}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+ }
+child { node {SkipLines}
+ }
+child { node {Code}
+child { node {Instruction}
+child { node {Assign}
+child { node {a}
+ }
+child { node {:=}
+ }
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {5}
+ }
+ }
+child { node {HpExpr}
+child { node {HpOp}
+child { node {*}
+ }
+ }
+child { node {SimpleExpr}
+child { node {4}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {LpOp}
+child { node {+}
+ }
+ }
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {2}
+ }
+ }
+child { node {HpExpr}
+child { node {HpOp}
+child { node {*}
+ }
+ }
+child { node {SimpleExpr}
+child { node {5}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+child { node {SkipLines}
+ }
+child { node {Code}
+child { node {Instruction}
+child { node {Assign}
+child { node {b}
+ }
+child { node {:=}
+ }
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {a}
+ }
+ }
+child { node {HpExpr}
+child { node {HpOp}
+child { node {*}
+ }
+ }
+child { node {SimpleExpr}
+child { node {a}
+ }
+ }
+child { node {HpExpr}
+child { node {HpOp}
+child { node {*}
+ }
+ }
+child { node {SimpleExpr}
+child { node {a}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {LpOp}
+child { node {+}
+ }
+ }
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {2}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+child { node {SkipLines}
+ }
+child { node {Code}
+child { node {Instruction}
+child { node {Assign}
+child { node {c}
+ }
+child { node {:=}
+ }
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {(}
+ }
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {(}
+ }
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {5}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {LpOp}
+child { node {+}
+ }
+ }
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {4}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+child { node {)}
+ }
+ }
+child { node {HpExpr}
+child { node {HpOp}
+child { node {*}
+ }
+ }
+child { node {SimpleExpr}
+child { node {2}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {)}
+ }
+ }
+child { node {HpExpr}
+child { node {HpOp}
+child { node {/}
+ }
+ }
+child { node {SimpleExpr}
+child { node {1}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+child { node {SkipLines}
+ }
+child { node {Code}
+child { node {Instruction}
+child { node {Assign}
+child { node {a}
+ }
+child { node {:=}
+ }
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {a}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {LpOp}
+child { node {+}
+ }
+ }
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {b}
+ }
+ }
+child { node {HpExpr}
+child { node {HpOp}
+child { node {/}
+ }
+ }
+child { node {SimpleExpr}
+child { node {c}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+child { node {SkipLines}
+ }
+child { node {Code}
+child { node {Instruction}
+child { node {Print}
+child { node {PRINT}
+ }
+child { node {(}
+ }
+child { node {ExprList}
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {a}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {ExpListEnd}
+child { node {,}
+ }
+child { node {ExprList}
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {b}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {ExpListEnd}
+child { node {,}
+ }
+child { node {ExprList}
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {c}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {ExpListEnd}
+child { node {,}
+ }
+child { node {ExprList}
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {5}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {ExpListEnd}
+child { node {,}
+ }
+child { node {ExprList}
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {(}
+ }
+child { node {ExprArith}
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {2}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {LpOp}
+child { node {+}
+ }
+ }
+child { node {HpProd}
+child { node {SimpleExpr}
+child { node {2}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+child { node {)}
+ }
+ }
+child { node {HpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {LpExpr}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+child { node {ExpListEnd}
+child { node {$\varepsilon$}
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+child { node {)}
+ }
+ }
+ }
+child { node {SkipLines}
+ }
+child { node {End}
+ }
+ }
+ }
+ }
+ }
+ }
+child { node {SkipLines}
+ }
+child { node {ENDPROG}
+ }
+child { node {SkipLines}
+ }
+child { node {}
+ }
+;
+\end{tikzpicture}
+
+\end{document}
+%% Local Variables:
+%% TeX-engine: luatex
+%% End:
