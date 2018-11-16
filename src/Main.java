@@ -24,6 +24,7 @@ public class Main {
 
     if (args.length > 1 && args[0].equals("-wt")) {
       try {
+        tree = true;
         drawTree(args[1]);
       } catch (Exception e) {
         System.out.println("Please specify a lex file to draw the tree");
@@ -35,17 +36,18 @@ public class Main {
         System.out.println("Usage: java -jar Part2.jar (-v) (-wt output.tex) input.sf");
       }
       try {
+        tree = true;
         drawTree(args[2]);
       } catch (Exception e) {
         System.out.println("Please specify a lex file to draw the tree");
       }
     }
-    startCompilation(args[(args.length)-1], verbose);
+    startCompilation(args[(args.length)-1], verbose, tree);
   }
 
-  private static void startCompilation(String filePath, boolean verbose) {
+  private static void startCompilation(String filePath, boolean verbose, boolean tree) {
     try {
-      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose);
+      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose, tree);
       parser.startParse();
     } catch (Exception e) {
       System.err.println("Failed to compile " + filePath);

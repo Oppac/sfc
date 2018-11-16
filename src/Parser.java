@@ -2,10 +2,16 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
+
 public class Parser {
   private Lexer scanner;
   private Symbol lookahead;
   public boolean verbose;
+  public boolean tree;
+  public boolean active_tree;
 
   private static String PROGRAM;
   private static String EPSILON;
@@ -61,10 +67,11 @@ public class Parser {
   private static String EXPLISTEND;
   private static String EXPLISTEND_EPSILON;
 
-  public Parser(BufferedReader filePath, boolean v) throws IOException {
+  public Parser(BufferedReader filePath, boolean v, boolean t) throws IOException {
     this.scanner = new Lexer(filePath);
     this.lookahead = scanner.yylex();
     this.verbose = v;
+    this.tree = t;
 
     if (verbose) {
       this.PROGRAM = "PROGRAM ";
@@ -181,68 +188,141 @@ public class Parser {
     this.lookahead = scanner.yylex();
   }
 
-  private void compareToken(LexicalUnit token) throws IOException {
+  private ParseTree compareToken(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
       throw new Error("\nError at line " + lookahead.getLine() + ": " +
       lookahead.getType() + " expected " + token);
     }
-    nextToken();
+    if (active_tree) {
+      Symbol label = lookahead;
+      nextToken();
+      return new ParseTree(label);
+    } else {
+      nextToken();
+      return null;
+    }
   }
 
-  public void startParse() throws IOException {
-    program();
+  public ParseTree startParse() throws IOException {
+    if (tree) {
+      active_tree = true;
+      return program();
+    } else {
+      program();
+      return null;
+    }
   }
 
-  private void skipEndline() throws IOException {
+  private ParseTree skipEndline() throws IOException {
     while (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
         nextToken();
     }
+    return null;
   }
 
-  private void program() throws IOException {
-    skipEndline();
+  private ParseTree program() throws IOException {
     System.out.print(PROGRAM);
-    compareToken(LexicalUnit.BEGINPROG);
-    compareToken(LexicalUnit.PROGNAME);
-    compareToken(LexicalUnit.ENDLINE);
-    skipEndline();
-    variables();
-    skipEndline();
-    code();
-    skipEndline();
-    compareToken(LexicalUnit.ENDPROG);
-    skipEndline();
-    compareToken(LexicalUnit.EOS);
-  }
-
-  private void variables() throws IOException {
-    if (lookahead.getType().equals(LexicalUnit.VARIABLES)) {
-      System.out.print(VARIABLES);
-      compareToken(LexicalUnit.VARIABLES);
-      varlist();
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      skipEndline(),
+      compareToken(LexicalUnit.BEGINPROG),
+      compareToken(LexicalUnit.PROGNAME),
+      compareToken(LexicalUnit.ENDLINE),
+      skipEndline(),
+      variables(),
+      skipEndline(),
+      code(),
+      skipEndline(),
+      compareToken(LexicalUnit.ENDPROG),
+      skipEndline(),
+      compareToken(LexicalUnit.EOS)
+      );
+      return new ParseTree("Program", treeList);
     } else {
-      System.out.print(VARIABLES_EPSILON);
+      skipEndline();
+      compareToken(LexicalUnit.BEGINPROG);
+      compareToken(LexicalUnit.PROGNAME);
+      compareToken(LexicalUnit.ENDLINE);
+      skipEndline();
+      variables();
+      skipEndline();
+      code();
+      skipEndline();
+      compareToken(LexicalUnit.ENDPROG);
+      skipEndline();
+      compareToken(LexicalUnit.EOS);
+      return null;
     }
   }
 
-  private void varlist() throws IOException {
-    System.out.print(VARLIST);
-    compareToken(LexicalUnit.VARNAME);
-    varlistend();
+  private ParseTree variables() throws IOException {
+    if (lookahead.getType().equals(LexicalUnit.VARIABLES)) {
+      System.out.print(VARIABLES);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.VARIABLES),
+        varlist()
+        );
+        return new ParseTree("Variables", treeList);
+      } else {
+        compareToken(LexicalUnit.VARIABLES);
+        varlist();
+        return null;
+      }
+    } else {
+      System.out.print(VARIABLES_EPSILON);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(new ParseTree("EPSILON"));
+        return new ParseTree("Variables", treeList);
+      } else {
+        return null;
+      }
+    }
   }
 
-  private void varlistend() throws IOException {
-    if (lookahead.getType().equals(LexicalUnit.COMMA)) {
-      System.out.print(VARLISTEND);
-      compareToken(LexicalUnit.COMMA);
+  private ParseTree varlist() throws IOException {
+    System.out.print(VARLIST);
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      compareToken(LexicalUnit.VARNAME),
+      varlistend()
+      );
+      return new ParseTree("Varlist", treeList);
+    } else {
       compareToken(LexicalUnit.VARNAME);
       varlistend();
+      return null;
+    }
+  }
+
+  private ParseTree varlistend() throws IOException {
+    if (lookahead.getType().equals(LexicalUnit.COMMA)) {
+      System.out.print(VARLISTEND);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.COMMA),
+        compareToken(LexicalUnit.VARNAME),
+        varlistend()
+        );
+        return new ParseTree("Varlistend", treeList);
+      } else {
+        compareToken(LexicalUnit.COMMA);
+        compareToken(LexicalUnit.VARNAME);
+        varlistend();
+        return null;
+      }
     } else {
-     System.out.print(VARLISTEND_EPSILON);
+      System.out.print(VARLISTEND_EPSILON);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(new ParseTree("EPSILON"));
+        return new ParseTree("Varlistend", treeList);
+      } else {
+        return null;
+      }
    }
   }
 
-  private void code() throws IOException {
+  private ParseTree code() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
       case IF:
@@ -251,132 +331,294 @@ public class Parser {
       case PRINT:
       case READ:
         System.out.print(CODE);
-        instruction();
-        if (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
-          skipEndline();
-          code();
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          instruction(),
+          skipEndline(),
+          code()
+          );
+          return new ParseTree("Code", treeList);
+        } else {
+          instruction();
+          if (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
+            skipEndline();
+            code();
+          }
         }
-        break;
     }
+    return null;
   }
 
-  private void instruction() throws IOException {
+  private ParseTree instruction() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
         System.out.print(INSTRUCTION_ASSIGN);
-        assign();
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(assign());
+          return new ParseTree("Instruction", treeList);
+        } else {
+          assign();
+          return null;
+        }
       case IF:
         System.out.print(INSTRUCTION_IF);
-        parse_if();
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(parse_if());
+          return new ParseTree("Instruction", treeList);
+        } else {
+          parse_if();
+          return null;
+        }
       case WHILE:
         System.out.print(INSTRUCTION_WHILE);
-        parse_while();
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(parse_while());
+          return new ParseTree("Instruction", treeList);
+        } else {
+          parse_while();
+          return null;
+        }
       case FOR:
         System.out.print(INSTRUCTION_FOR);
-        parse_for();
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(parse_for());
+          return new ParseTree("Instruction", treeList);
+        } else {
+          parse_for();
+          return null;
+        }
       case PRINT:
         System.out.print(INSTRUCTION_PRINT);
-        parse_print();
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(parse_print());
+          return new ParseTree("Instruction", treeList);
+        } else {
+          parse_print();
+          return null;
+        }
       case READ:
         System.out.print(INSTRUCTION_READ);
-        parse_read();
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(parse_read());
+          return new ParseTree("Instruction", treeList);
+        } else {
+          parse_read();
+          return null;
+        }
+    }
+    return null;
+  }
+
+  private ParseTree assign() throws IOException {
+    System.out.print(ASSIGN);
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      compareToken(LexicalUnit.VARNAME),
+      compareToken(LexicalUnit.ASSIGN),
+      exprArith()
+      );
+      return new ParseTree("Assign", treeList);
+    } else {
+      compareToken(LexicalUnit.VARNAME);
+      compareToken(LexicalUnit.ASSIGN);
+      exprArith();
+      return null;
     }
   }
 
-  private void assign() throws IOException {
-    System.out.print(ASSIGN);
-    compareToken(LexicalUnit.VARNAME);
-    compareToken(LexicalUnit.ASSIGN);
-    exprArith();
-  }
-
-  private void exprArith() throws IOException {
+  private ParseTree exprArith() throws IOException {
     System.out.print(EXPRARITH);
-    hpProd();
-    lpExpr();
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      hpProd(),
+      lpExpr()
+      );
+      return new ParseTree("ExprArith", treeList);
+    } else {
+      hpProd();
+      lpExpr();
+      return null;
+    }
   }
 
-  private void hpProd() throws IOException {
+  private ParseTree hpProd() throws IOException {
     System.out.print(HPPROD);
-    simpleExpr();
-    hpExpr();
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      simpleExpr(),
+      hpExpr()
+      );
+      return new ParseTree("HpProd", treeList);
+    } else {
+      simpleExpr();
+      hpExpr();
+      return null;
+    }
   }
 
-  private void hpExpr() throws IOException {
+  private ParseTree hpExpr() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.TIMES) ||
         lookahead.getType().equals(LexicalUnit.DIVIDE)) {
           System.out.print(HPEXPR);
-          hpOp();
-          simpleExpr();
-          hpExpr();
+          if (active_tree) {
+            List<ParseTree> treeList = Arrays.asList(
+            hpOp(),
+            simpleExpr(),
+            hpExpr()
+            );
+            return new ParseTree("HpExpr", treeList);
+          } else {
+            hpOp();
+            simpleExpr();
+            hpExpr();
+            return null;
+          }
     } else {
       System.out.print(HPEXPR_EPSILON);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(new ParseTree("EPSILON"));
+        return new ParseTree("HpExpr", treeList);
+      } else {
+        return null;
+      }
     }
   }
 
-  private void lpExpr() throws IOException {
+  private ParseTree lpExpr() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.PLUS) ||
         lookahead.getType().equals(LexicalUnit.MINUS)) {
-        System.out.print(LPEXPR);
-        lpOp();
-        hpProd();
+          System.out.print(LPEXPR);
+          if (active_tree) {
+            List<ParseTree> treeList = Arrays.asList(
+            lpOp(),
+            hpProd()
+            );
+            return new ParseTree("LpExpr", treeList);
+          } else {
+            lpOp();
+            hpProd();
+            return null;
+          }
     } else {
       System.out.print(LPEXPR_EPSILON);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(new ParseTree("EPSILON"));
+        return new ParseTree("LpExpr", treeList);
+      } else {
+        return null;
+      }
     }
   }
 
-  private void simpleExpr() throws IOException {
+  private ParseTree simpleExpr() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
         System.out.print(SIMPLEEXPR_VARNAME);
-        nextToken();
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.VARNAME)
+          );
+          return new ParseTree("SimpleExpr", treeList);
+        } else {
+          nextToken();
+          return null;
+        }
       case NUMBER:
         System.out.print(SIMPLEEXPR_NUMBER);
-        nextToken();
-        break;
-      case LPAREN:
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.NUMBER)
+          );
+          return new ParseTree("SimpleExpr", treeList);
+        } else {
+          nextToken();
+          return null;
+        }
+        case LPAREN:
         System.out.print(SIMPLEEXPR_PAREN);
-        nextToken();
-        exprArith();
-        compareToken(LexicalUnit.RPAREN);
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.LPAREN),
+          exprArith(),
+          compareToken(LexicalUnit.RPAREN)
+          );
+          return new ParseTree("SimpleExpr", treeList);
+        } else {
+          nextToken();
+          exprArith();
+          compareToken(LexicalUnit.RPAREN);
+          return null;
+        }
       case MINUS:
-        System.out.print(SIMPLEEXPR_MINUS);
-        nextToken();
-        exprArith();
-        break;
+      System.out.print(SIMPLEEXPR_MINUS);
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.MINUS),
+          exprArith()
+          );
+          return new ParseTree("SimpleExpr", treeList);
+        } else {
+          nextToken();
+          exprArith();
+          return null;
+        }
       default:
-      throw new Error("\nError at line " + lookahead.getLine() + ": " +
-       lookahead.getType() + " expected a number, a variable or an arithmetic expression");
+        throw new Error("\nError at line " + lookahead.getLine() + ": " +
+        lookahead.getType() + " expected a number, a variable or an arithmetic expression");
     }
   }
 
-  private void hpOp() throws IOException {
+  private ParseTree hpOp() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.TIMES)) {
       System.out.print(HPOP_TIMES);
-      nextToken();
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.TIMES)
+        );
+        return new ParseTree("HpOp", treeList);
+      } else {
+        nextToken();
+        return null;
+      }
     } else if (lookahead.getType().equals(LexicalUnit.DIVIDE)) {
       System.out.print(HPOP_DIVIDE);
-      nextToken();
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.DIVIDE)
+        );
+        return new ParseTree("HpOp", treeList);
+      } else {
+        nextToken();
+        return null;
+      }
     } else {
       throw new Error("\nError at line " + lookahead.getLine() + ": " +
       lookahead.getType() + " expected multiplication or division operator");
     }
   }
 
-  private void lpOp() throws IOException {
+  private ParseTree lpOp() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.PLUS)) {
       System.out.print(LPOP_PLUS);
-      nextToken();
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.PLUS)
+        );
+        return new ParseTree("LpOp", treeList);
+      } else {
+        nextToken();
+        return null;
+      }
     } else if (lookahead.getType().equals(LexicalUnit.MINUS)) {
       System.out.print(LPOP_MINUS);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.MINUS)
+        );
+        return new ParseTree("LpOp", treeList);
+      } else {
+        return null;
+      }
     } else {
       throw new Error("\nError at line " + lookahead.getLine() + ": " +
       lookahead.getType() + " expected addition or substraction operator");
@@ -384,161 +626,380 @@ public class Parser {
 
   }
 
-  private void parse_if() throws IOException {
+  private ParseTree parse_if() throws IOException {
     System.out.print(IF);
-    compareToken(LexicalUnit.IF);
-    compareToken(LexicalUnit.LPAREN);
-    cond();
-    compareToken(LexicalUnit.RPAREN);
-    compareToken(LexicalUnit.THEN);
-    skipEndline();
-    code();
-    ifElse();
-    compareToken(LexicalUnit.ENDIF);
-  }
-
-  private void ifElse() throws IOException {
-    if (lookahead.getType().equals(LexicalUnit.ELSE)) {
-      System.out.print(IFELSE);
-      compareToken(LexicalUnit.ELSE);
-      compareToken(LexicalUnit.ENDLINE);
-      code();
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      compareToken(LexicalUnit.IF),
+      compareToken(LexicalUnit.LPAREN),
+      cond(),
+      compareToken(LexicalUnit.RPAREN),
+      compareToken(LexicalUnit.THEN),
+      skipEndline(),
+      code(),
+      ifElse(),
+      compareToken(LexicalUnit.ENDIF)
+      );
+      return new ParseTree("If", treeList);
     } else {
-      System.out.print(IFELSE_EPSILON);
+      compareToken(LexicalUnit.IF);
+      compareToken(LexicalUnit.LPAREN);
+      cond();
+      compareToken(LexicalUnit.RPAREN);
+      compareToken(LexicalUnit.THEN);
+      skipEndline();
+      code();
+      ifElse();
+      compareToken(LexicalUnit.ENDIF);
+      return null;
     }
   }
 
-  private void cond() throws IOException {
+  private ParseTree ifElse() throws IOException {
+    if (lookahead.getType().equals(LexicalUnit.ELSE)) {
+      System.out.print(IFELSE);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.ELSE),
+        compareToken(LexicalUnit.ENDLINE),
+        code()
+        );
+        return new ParseTree("IfElse", treeList);
+      } else {
+        compareToken(LexicalUnit.ELSE);
+        compareToken(LexicalUnit.ENDLINE);
+        code();
+        return null;
+      }
+    } else {
+      System.out.print(IFELSE_EPSILON);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(new ParseTree("EPSILON"));
+        return new ParseTree("IfElse", treeList);
+      } else {
+        return null;
+      }
+    }
+  }
+
+  private ParseTree cond() throws IOException {
     System.out.print(COND);
-    pCond();
-    lpCond();
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      pCond(),
+      lpCond()
+      );
+      return new ParseTree("Cond", treeList);
+    } else {
+      pCond();
+      lpCond();
+      return null;
+    }
   }
 
-  private void pCond() throws IOException {
+  private ParseTree pCond() throws IOException {
     System.out.print(PCOND);
-    simpleCond();
-    hpCond();
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      simpleCond(),
+      hpCond()
+      );
+      return new ParseTree("PCond", treeList);
+    } else {
+      simpleCond();
+      hpCond();
+      return null;
+    }
   }
 
-  private void hpCond() throws IOException {
+  private ParseTree hpCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.AND)) {
-          System.out.print(HPCOND_AND);
+      System.out.print(HPCOND_AND);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.AND),
+        simpleCond(),
+        hpCond()
+        );
+        return new ParseTree("HpCond", treeList);
+      } else {
           compareToken(LexicalUnit.AND);
           simpleCond();
           hpCond();
+          return null;
+        }
     } else {
       System.out.print(HPCOND_EPSILON);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(new ParseTree("EPSILON"));
+        return new ParseTree("HpCond", treeList);
+      } else {
+        return null;
+      }
     }
   }
 
-  private void lpCond() throws IOException {
+  private ParseTree lpCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.OR)) {
       System.out.print(LPCOND_OR);
-      compareToken(LexicalUnit.OR);
-      pCond();
-      lpCond();
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.OR),
+        pCond(),
+        lpCond()
+        );
+        return new ParseTree("LpCond", treeList);
+      } else {
+        compareToken(LexicalUnit.OR);
+        pCond();
+        lpCond();
+        return null;
+      }
     } else {
       System.out.print(LPCOND_EPSILON);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(new ParseTree("EPSILON"));
+        return new ParseTree("LpCond", treeList);
+      } else {
+        return null;
+      }
     }
   }
 
-  private void simpleCond() throws IOException {
+  private ParseTree simpleCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.NOT)) {
       System.out.print(SIMPLECOND_NOT);
-      compareToken(LexicalUnit.NOT);
-      simpleCond();
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.NOT),
+        simpleCond()
+        );
+        return new ParseTree("SimpleCond", treeList);
+      } else {
+        compareToken(LexicalUnit.NOT);
+        simpleCond();
+        return null;
+      }
     } else {
-      exprArith();
-      comp();
-      exprArith();
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        exprArith(),
+        comp(),
+        exprArith()
+        );
+        return new ParseTree("SimpleCond", treeList);
+      } else {
+        exprArith();
+        comp();
+        exprArith();
+        return null;
+      }
     }
   }
 
-  private void comp() throws IOException {
+  private ParseTree comp() throws IOException {
     switch(lookahead.getType()) {
       case EQ:
         System.out.print(COMP_EQ);
-        compareToken(LexicalUnit.EQ);
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.EQ)
+          );
+          return new ParseTree("Comp", treeList);
+        } else {
+          compareToken(LexicalUnit.EQ);
+          return null;
+        }
       case GEQ:
         System.out.print(COMP_GEQ);
-        compareToken(LexicalUnit.GEQ);
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.GEQ)
+          );
+          return new ParseTree("Comp", treeList);
+        } else {
+          compareToken(LexicalUnit.GEQ);
+          return null;
+        }
       case GT:
         System.out.print(COMP_GT);
-        compareToken(LexicalUnit.GT);
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.GT)
+          );
+          return new ParseTree("Comp", treeList);
+        } else {
+          compareToken(LexicalUnit.GT);
+          return null;
+        }
       case LEQ:
         System.out.print(COMP_LEQ);
-        compareToken(LexicalUnit.LEQ);
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.LEQ)
+          );
+          return new ParseTree("Comp", treeList);
+        } else {
+          compareToken(LexicalUnit.LEQ);
+          return null;
+        }
       case LT:
         System.out.print(COMP_LT);
-        compareToken(LexicalUnit.LT);
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.LT)
+          );
+          return new ParseTree("Comp", treeList);
+        } else {
+          compareToken(LexicalUnit.LT);
+          return null;
+        }
       case NEQ:
         System.out.print(COMP_NEQ);
-        compareToken(LexicalUnit.NEQ);
-        break;
+        if (active_tree) {
+          List<ParseTree> treeList = Arrays.asList(
+          compareToken(LexicalUnit.NEQ)
+          );
+          return new ParseTree("Comp", treeList);
+        } else {
+          compareToken(LexicalUnit.NEQ);
+          return null;
+        }
       default:
-      throw new Error("\nError at line " + lookahead.getLine() + ": " +
-      lookahead.getType() + " expected a comparaison operator");
+        throw new Error("\nError at line " + lookahead.getLine() + ": " +
+        lookahead.getType() + " expected a comparaison operator");
     }
   }
 
-  private void parse_while() throws IOException {
+  private ParseTree parse_while() throws IOException {
     System.out.print(WHILE);
-    compareToken(LexicalUnit.WHILE);
-    cond();
-    compareToken(LexicalUnit.DO);
-    skipEndline();
-    code();
-    compareToken(LexicalUnit.ENDWHILE);
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      compareToken(LexicalUnit.WHILE),
+      cond(),
+      compareToken(LexicalUnit.DO),
+      skipEndline(),
+      code(),
+      compareToken(LexicalUnit.ENDWHILE)
+      );
+      return new ParseTree("While", treeList);
+    } else {
+      compareToken(LexicalUnit.WHILE);
+      cond();
+      compareToken(LexicalUnit.DO);
+      skipEndline();
+      code();
+      compareToken(LexicalUnit.ENDWHILE);
+      return null;
+    }
   }
 
-  private void parse_for() throws IOException {
+  private ParseTree parse_for() throws IOException {
     System.out.print(FOR);
-    compareToken(LexicalUnit.FOR);
-    compareToken(LexicalUnit.VARNAME);
-    compareToken(LexicalUnit.ASSIGN);
-    exprArith();
-    compareToken(LexicalUnit.TO);
-    exprArith();
-    compareToken(LexicalUnit.DO);
-    skipEndline();
-    code();
-    compareToken(LexicalUnit.ENDFOR);
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      compareToken(LexicalUnit.FOR),
+      compareToken(LexicalUnit.VARNAME),
+      compareToken(LexicalUnit.ASSIGN),
+      exprArith(),
+      compareToken(LexicalUnit.TO),
+      exprArith(),
+      compareToken(LexicalUnit.DO),
+      skipEndline(),
+      code(),
+      compareToken(LexicalUnit.ENDFOR)
+      );
+      return new ParseTree("For", treeList);
+    } else {
+      compareToken(LexicalUnit.FOR);
+      compareToken(LexicalUnit.VARNAME);
+      compareToken(LexicalUnit.ASSIGN);
+      exprArith();
+      compareToken(LexicalUnit.TO);
+      exprArith();
+      compareToken(LexicalUnit.DO);
+      skipEndline();
+      code();
+      compareToken(LexicalUnit.ENDFOR);
+      return null;
+    }
   }
 
-  private void parse_print() throws IOException {
+  private ParseTree parse_print() throws IOException {
     System.out.print(PRINT);
-    compareToken(LexicalUnit.PRINT);
-    compareToken(LexicalUnit.LPAREN);
-    exprList();
-    compareToken(LexicalUnit.RPAREN);
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      compareToken(LexicalUnit.PRINT),
+      compareToken(LexicalUnit.LPAREN),
+      exprList(),
+      compareToken(LexicalUnit.RPAREN)
+      );
+      return new ParseTree("Print", treeList);
+    } else {
+      compareToken(LexicalUnit.PRINT);
+      compareToken(LexicalUnit.LPAREN);
+      exprList();
+      compareToken(LexicalUnit.RPAREN);
+      return null;
+    }
   }
 
-  private void parse_read() throws IOException {
+  private ParseTree parse_read() throws IOException {
     System.out.print(READ);
-    compareToken(LexicalUnit.READ);
-    compareToken(LexicalUnit.LPAREN);
-    varlist();
-    compareToken(LexicalUnit.RPAREN);
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      compareToken(LexicalUnit.READ),
+      compareToken(LexicalUnit.LPAREN),
+      varlist(),
+      compareToken(LexicalUnit.RPAREN)
+      );
+      return new ParseTree("Read", treeList);
+    } else {
+      compareToken(LexicalUnit.READ);
+      compareToken(LexicalUnit.LPAREN);
+      varlist();
+      compareToken(LexicalUnit.RPAREN);
+      return null;
+    }
   }
 
-  private void exprList() throws IOException {
+  private ParseTree exprList() throws IOException {
     System.out.print(EXPLIST);
-    exprArith();
-    expListEnd();
+    if (active_tree) {
+      List<ParseTree> treeList = Arrays.asList(
+      exprArith(),
+      expListEnd()
+      );
+      return new ParseTree("ExprList", treeList);
+    } else {
+      exprArith();
+      expListEnd();
+      return null;
+    }
   }
 
-  private void expListEnd() throws IOException {
+  private ParseTree expListEnd() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.COMMA)) {
       System.out.print(EXPLISTEND);
-      compareToken(LexicalUnit.COMMA);
-      exprList();
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.COMMA),
+        exprList()
+        );
+        return new ParseTree("ExpListEnd", treeList);
+      } else {
+        compareToken(LexicalUnit.COMMA);
+        exprList();
+        return null;
+      }
     } else {
       System.out.print(EXPLISTEND_EPSILON);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(new ParseTree("EPSILON"));
+        return new ParseTree("ExpListEnd", treeList);
+      } else {
+        return null;
+      }
     }
   }
 
