@@ -15,28 +15,32 @@ public class Main {
     boolean tree = false;
 
     if (args.length < 1 || args.length > 4) {
-      System.out.println("Usage: java -jar Part2.jar input.sf -v -wt output.tex");
+      System.out.println("Usage: java -jar Part2.jar (-v) (-wt output.tex) input.sf");
     }
 
-    if (args.length > 1 && args[1].equals("-v")) {
+    if (args.length > 1 && args[0].equals("-v")) {
       verbose = true;
     }
 
-    if (args.length > 1 && args[1].equals("-wt")) {
+    if (args.length > 1 && args[0].equals("-wt")) {
+      try {
+        drawTree(args[1]);
+      } catch (Exception e) {
+        System.out.println("Please specify a lex file to draw the tree");
+      }
+    } else if (args.length > 1 && args[1].equals("-wt")) {
+      if (args[0].equals("-v")) {
+        verbose = true;
+      } else {
+        System.out.println("Usage: java -jar Part2.jar (-v) (-wt output.tex) input.sf");
+      }
       try {
         drawTree(args[2]);
       } catch (Exception e) {
         System.out.println("Please specify a lex file to draw the tree");
       }
-    } else if (args.length > 2 && args[2].equals("-wt")) {
-      try {
-        drawTree(args[3]);
-      } catch (Exception e) {
-        System.out.println("Please specify a lex file to draw the tree");
-      }
     }
-
-    startCompilation(args[0], verbose);
+    startCompilation(args[(args.length)-1], verbose);
   }
 
   private static void startCompilation(String filePath, boolean verbose) {

@@ -67,7 +67,7 @@ public class Parser {
     this.verbose = v;
 
     if (verbose) {
-      this.PROGRAM = " PROGRAM ";
+      this.PROGRAM = "PROGRAM ";
       this.EPSILON = "EPSILON ";
       this.VARIABLES = "VARIABLES ";
       this.VARIABLES_EPSILON = "VARIABLES_EPSILON ";
@@ -121,7 +121,7 @@ public class Parser {
       this.EXPLISTEND = "EXPLISTEND ";
       this.EXPLISTEND_EPSILON = "EXPLISTEND_EPSILON ";
     } else {
-      this.PROGRAM = " 1 ";
+      this.PROGRAM = "1 ";
       this.EPSILON = "2 ";
       this.VARIABLES = "3 ";
       this.VARIABLES_EPSILON = "4 ";
@@ -183,9 +183,8 @@ public class Parser {
 
   private void compareToken(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
-      System.out.println("\nError " + lookahead.getType() + " != " + token);
-    } else {
-      //System.out.println("\nOk " + lookahead.getType() + " == " + token);
+      throw new Error("\nError at line " + lookahead.getLine() + ": " +
+      lookahead.getType() + " expected " + token);
     }
     nextToken();
   }
@@ -197,7 +196,6 @@ public class Parser {
   private void skipEndline() throws IOException {
     while (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
         nextToken();
-        //System.out.println("Skip");
     }
   }
 
@@ -354,6 +352,9 @@ public class Parser {
         nextToken();
         exprArith();
         break;
+      default:
+      throw new Error("\nError at line " + lookahead.getLine() + ": " +
+       lookahead.getType() + " expected a number, a variable or an arithmetic expression");
     }
   }
 
@@ -364,6 +365,9 @@ public class Parser {
     } else if (lookahead.getType().equals(LexicalUnit.DIVIDE)) {
       System.out.print(HPOP_DIVIDE);
       nextToken();
+    } else {
+      throw new Error("\nError at line " + lookahead.getLine() + ": " +
+      lookahead.getType() + " expected multiplication or division operator");
     }
   }
 
@@ -373,7 +377,11 @@ public class Parser {
       nextToken();
     } else if (lookahead.getType().equals(LexicalUnit.MINUS)) {
       System.out.print(LPOP_MINUS);
+    } else {
+      throw new Error("\nError at line " + lookahead.getLine() + ": " +
+      lookahead.getType() + " expected addition or substraction operator");
     }
+
   }
 
   private void parse_if() throws IOException {
@@ -472,6 +480,9 @@ public class Parser {
         System.out.print(COMP_NEQ);
         compareToken(LexicalUnit.NEQ);
         break;
+      default:
+      throw new Error("\nError at line " + lookahead.getLine() + ": " +
+      lookahead.getType() + " expected a comparaison operator");
     }
   }
 
