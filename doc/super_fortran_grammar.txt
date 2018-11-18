@@ -4,10 +4,10 @@ Transformed Super-Fortran Grammar
 [02] <Variables>          -> VARIABLES <VarList> [EndLine]
 [03]			  -> EPSILON
 [04] <VarList>            -> [VarName] <VarListEnd>
-[05] <VarListEnd>         -> EPSILON
-[06]			  -> COMMA <VarList>
-[07] <Code>		  -> EPSILON
-[08]			  -> <Instruction> [EndLine] <Code>
+[05] <VarListEnd>         -> COMMA <VarList>
+[06]			  -> EPSILON
+[07] <Code>		  -> <Instruction> [EndLine] <Code>
+[08]			  -> EPSILON
 [09] <Instruction>	  -> <Assign>
 [10]			  -> <If>
 [11]			  -> <While>
