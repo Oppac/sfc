@@ -69,14 +69,12 @@ public class Parser {
 
   /**
   * Constructor for the Parser.
-  * Set up a scanner and assign the value of the rules (the number of the rule
-  * in the grammar or it's name if verbose is active).
-  *
+  * Set up a scanner and assigns a value to each rules of
+  * the grammar. It is either the number of the rule in the grammar or
+  * it's name if verbose is active.
   * @param filePath path to the file to parse
-  * @param v if the verbose option is active or not
-  * @param t if the option for drawing the tree is active or not
-  * @return return a ParseTree object, empty or not depending on if the
-  * the option of drawing is active or not.
+  * @param v tell if the verbose option is active or not
+  * @param t tell if the option for drawing the tree is active or not
   */
 
   public Parser(BufferedReader filePath, boolean v, boolean t) throws IOException {
@@ -207,10 +205,10 @@ public class Parser {
 
   /**
   * Compare the expected token to the current token.
-  * @param token the expected token
-  * @return if the token match, return a ParseTree (either null or with
-  * the proper label if draw tree is active)
-  * @throws IOException give an error if the tokens do not match
+  * @param token the expected token.
+  * @return if the tokens match, return a ParseTree (either null or with
+  * the proper label if draw tree is active).
+  * @throws IOException give an error if the tokens do not match.
   */
   private ParseTree compareToken(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
@@ -229,12 +227,12 @@ public class Parser {
 
   /**
   * Start the parsing of the input file at the initial symbol of the grammar.
-  * @return if the tree drawing is not active the parser return an empty ParseTree, if
+  * @return if the tree drawing is not active the parser return an empty ParseTree. If
   * the execution was without errors the proper rules numbers/names have been written
-  * on the standard output.
+  * on the standard output. We don't need retrieve the tree in this case so all the nodes are null.
   * @return if the tree drawing option was active, the parser return a ParseTree
-  * containing the nodes that can then be fetch by Main in order to write the
-  * tree on the specified file.
+  * containing the nodes with their labels and children. The ParsTree can then be
+  * retrieve by Main in order to write the tree on the specified file.
   */
   public ParseTree startParse() throws IOException {
     if (tree) {
@@ -247,7 +245,7 @@ public class Parser {
   }
 
   /**
-  * We allowed the input program to have has many endlines has it want at some specific
+  * We allowed the input program to have as many endlines has it want at some specific
   * points in the program. They are ignored by the "standard" parser and return a node
   * called "SkipLines" for the ParseTree. It allow to see in the tree where extra
   * endlines are.
@@ -261,7 +259,7 @@ public class Parser {
   }
 
   /**
-  * The first step of the parsing. The function has two "mode". One where option to
+  * The first step of the parsing. The function has two "modes". One where the option to
   * draw the tree is inactive and the other one where it is active. In the "inactive mode"
   * the parser only check that the input is correct. It returns a null node as the
   * ParseTree will be discarded at the end anyway. In the "active mode", a new ParseTree
