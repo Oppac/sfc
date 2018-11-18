@@ -12,6 +12,7 @@ public class Parser {
   public boolean tree;
   public boolean active_tree;
 
+  //The rules of the grammar
   private static String PROGRAM;
   private static String VARIABLES;
   private static String VARIABLES_EPSILON;
@@ -66,12 +67,25 @@ public class Parser {
   private static String EXPLISTEND;
   private static String EXPLISTEND_EPSILON;
 
+  /**
+  * Constructor for the Parser.
+  * Set up a scanner and assign the value of the rules (the number of the rule
+  * in the grammar or it's name if verbose is active).
+  *
+  * @param filePath path to the file to parse
+  * @param v if the verbose option is active or not
+  * @param t if the option for drawing the tree is active or not
+  * @return return a ParseTree object, empty or not depending on if the
+  * the option of drawing is active or not.
+  */
+
   public Parser(BufferedReader filePath, boolean v, boolean t) throws IOException {
     this.scanner = new Lexer(filePath);
     this.lookahead = scanner.yylex();
     this.verbose = v;
     this.tree = t;
 
+    //Ouput for the verbose option
     if (verbose) {
       this.PROGRAM = "PROGRAM ";
       this.VARIABLES = "VARIABLES ";
@@ -126,6 +140,7 @@ public class Parser {
       this.EXPLIST = "EXPLIST ";
       this.EXPLISTEND = "EXPLISTEND ";
       this.EXPLISTEND_EPSILON = "EXPLISTEND_EPSILON ";
+    //Standard output, the rules are assigned their number in the grammar
     } else {
       this.PROGRAM = "1 ";
       this.VARIABLES = "2 ";
@@ -183,10 +198,20 @@ public class Parser {
     }
   }
 
+  /*
+  * Fetch the next token to parse.
+  */
   private void nextToken() throws IOException {
     this.lookahead = scanner.yylex();
   }
 
+  /**
+  * Compare the expected token to the current token.
+  * @param token the expected token
+  * @return if the token match, return a ParseTree (either null or with
+  * the proper label if draw tree is active)
+  * @throws IOException give an error if the tokens do not match
+  */
   private ParseTree compareToken(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
       throw new Error("\nError at line " + lookahead.getLine() + ": " +
@@ -202,6 +227,15 @@ public class Parser {
     }
   }
 
+  /**
+  * Start the parsing of the input file at the initial symbol of the grammar.
+  * @return if the tree drawing is not active the parser return an empty ParseTree, if
+  * the execution was without errors the proper rules numbers/names have been written
+  * on the standard output.
+  * @return if the tree drawing option was active, the parser return a ParseTree
+  * containing the nodes that can then be fetch by Main in order to write the
+  * tree on the specified file.
+  */
   public ParseTree startParse() throws IOException {
     if (tree) {
       active_tree = true;
@@ -212,6 +246,13 @@ public class Parser {
     }
   }
 
+  /**
+  * We allowed the input program to have has many endlines has it want at some specific
+  * points in the program. They are ignored by the "standard" parser and return a node
+  * called "SkipLines" for the ParseTree. It allow to see in the tree where extra
+  * endlines are.
+  * @return a "SkipLines" node for the ParseTree.
+  */
   private ParseTree skipEndline() throws IOException {
     while (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
         nextToken();
@@ -219,6 +260,17 @@ public class Parser {
     return new ParseTree("SkipLines");
   }
 
+  /**
+  * The first step of the parsing. The function has two "mode". One where option to
+  * draw the tree is inactive and the other one where it is active. In the "inactive mode"
+  * the parser only check that the input is correct. It returns a null node as the
+  * ParseTree will be discarded at the end anyway. In the "active mode", a new ParseTree
+  * following the rules defined in ParseTree.java is returned instead. In both case
+  * the rule number/name is printed on the standard output.
+  * The other functions will not be detailed but they all follow the same model.
+  * @return a ParseTree either correct or null depending on the selected option.
+  */
+  //[01] <Program> -> BEGINPROG [ProgName] [EndLine] <Variables> <Code> ENDPROG
   private ParseTree program() throws IOException {
     System.out.print(PROGRAM);
     if (active_tree) {
@@ -254,6 +306,8 @@ public class Parser {
     }
   }
 
+  //[02] <Variables> -> VARIABLES <VarList> [EndLine]
+  //[03] <Variables> -> EPSILON
   private ParseTree variables() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.VARIABLES)) {
       System.out.print(VARIABLES);
@@ -279,6 +333,7 @@ public class Parser {
     }
   }
 
+  //[04] <VarList> -> [VarName] <VarListEnd>
   private ParseTree varlist() throws IOException {
     System.out.print(VARLIST);
     if (active_tree) {
@@ -294,6 +349,8 @@ public class Parser {
     }
   }
 
+  //[05] <VarListEnd> -> COMMA <VarList>
+  //[06] <VarListEnd> -> EPSILON
   private ParseTree varlistend() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.COMMA)) {
       System.out.print(VARLISTEND);
@@ -321,6 +378,8 @@ public class Parser {
    }
   }
 
+  //[07] <Code> -> <Instruction> [EndLine] <Code>
+  //[08] <Code> -> EPSILON
   private ParseTree code() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
@@ -354,6 +413,12 @@ public class Parser {
     }
   }
 
+  //[09] <Instruction> -> <Assign>
+  //[10] <Instruction> -> <If>
+  //[11] <Instruction> -> <While>
+  //[12] <Instruction> -> <For>
+  //[13] <Instruction> -> <Print>
+  //[14] <Instruction> -> <Read>
   private ParseTree instruction() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
@@ -414,6 +479,7 @@ public class Parser {
     return null;
   }
 
+  //[15] <Assign> -> [VarName] ASSIGN <ExprArith>
   private ParseTree assign() throws IOException {
     System.out.print(ASSIGN);
     if (active_tree) {
@@ -431,6 +497,7 @@ public class Parser {
     }
   }
 
+  //[16] <ExprArith> -> <HpProd> <LpExpr>
   private ParseTree exprArith() throws IOException {
     System.out.print(EXPRARITH);
     if (active_tree) {
@@ -446,6 +513,7 @@ public class Parser {
     }
   }
 
+  //[17] <HpProd> -> <SimpleExpr> <HpExpr>
   private ParseTree hpProd() throws IOException {
     System.out.print(HPPROD);
     if (active_tree) {
@@ -461,6 +529,8 @@ public class Parser {
     }
   }
 
+  //[18] <HpExpr> -> <HpOp> <SimpleExpr> <HpExpr>
+  //[19] <HpExpr> -> EPSILON
   private ParseTree hpExpr() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.TIMES) ||
         lookahead.getType().equals(LexicalUnit.DIVIDE)) {
@@ -489,6 +559,8 @@ public class Parser {
     }
   }
 
+  //[20] <LpExpr> -> <LpOp> <HpProd> <LpExpr>
+  //[21] <LpExpr> -> EPSILON
   private ParseTree lpExpr() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.PLUS) ||
         lookahead.getType().equals(LexicalUnit.MINUS)) {
@@ -517,6 +589,10 @@ public class Parser {
     }
   }
 
+  //[22] <SimpleExpr> -> [VarName]
+  //[23] <SimpleExpr> -> [Number]
+  //[24] <SimpleExpr>	-> LPAREN <ExprArith> RPAREN
+  //[25] <SimpleExpr>	-> MINUS <SimpleExpr>
   private ParseTree simpleExpr() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
@@ -575,6 +651,38 @@ public class Parser {
     }
   }
 
+  //[26] <LpOp> -> PLUS
+  //[27] <LpOp> -> MINUS
+  private ParseTree lpOp() throws IOException {
+    if (lookahead.getType().equals(LexicalUnit.PLUS)) {
+      System.out.print(LPOP_PLUS);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.PLUS)
+        );
+        return new ParseTree("LpOp", treeList);
+      } else {
+        nextToken();
+        return null;
+      }
+    } else if (lookahead.getType().equals(LexicalUnit.MINUS)) {
+      System.out.print(LPOP_MINUS);
+      if (active_tree) {
+        List<ParseTree> treeList = Arrays.asList(
+        compareToken(LexicalUnit.MINUS)
+        );
+        return new ParseTree("LpOp", treeList);
+      } else {
+        return null;
+      }
+    } else {
+      throw new Error("\nError at line " + lookahead.getLine() + ": " +
+      lookahead.getType() + " expected addition or substraction operator");
+    }
+  }
+
+  //[28] <HpOp> -> TIMES
+  //[29] <HpOp> -> DIVIDE
   private ParseTree hpOp() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.TIMES)) {
       System.out.print(HPOP_TIMES);
@@ -604,35 +712,7 @@ public class Parser {
     }
   }
 
-  private ParseTree lpOp() throws IOException {
-    if (lookahead.getType().equals(LexicalUnit.PLUS)) {
-      System.out.print(LPOP_PLUS);
-      if (active_tree) {
-        List<ParseTree> treeList = Arrays.asList(
-        compareToken(LexicalUnit.PLUS)
-        );
-        return new ParseTree("LpOp", treeList);
-      } else {
-        nextToken();
-        return null;
-      }
-    } else if (lookahead.getType().equals(LexicalUnit.MINUS)) {
-      System.out.print(LPOP_MINUS);
-      if (active_tree) {
-        List<ParseTree> treeList = Arrays.asList(
-        compareToken(LexicalUnit.MINUS)
-        );
-        return new ParseTree("LpOp", treeList);
-      } else {
-        return null;
-      }
-    } else {
-      throw new Error("\nError at line " + lookahead.getLine() + ": " +
-      lookahead.getType() + " expected addition or substraction operator");
-    }
-
-  }
-
+  //[30] <If> -> IF <Cond> THEN <Code> <IfElse> ENDIF
   private ParseTree parse_if() throws IOException {
     System.out.print(IF);
     if (active_tree) {
@@ -662,6 +742,8 @@ public class Parser {
     }
   }
 
+  //[31] <IfElse> -> ELSE [EndLine] <Code>
+  //[32] <IfElse> -> EPSILON
   private ParseTree ifElse() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.ELSE)) {
       System.out.print(IFELSE);
@@ -689,6 +771,7 @@ public class Parser {
     }
   }
 
+  //[33] <Cond> -> <PCond> <LpCond>
   private ParseTree cond() throws IOException {
     System.out.print(COND);
     if (active_tree) {
@@ -704,6 +787,7 @@ public class Parser {
     }
   }
 
+  //[34] <PCond> -> <SimpleCond> <HpCond>
   private ParseTree pCond() throws IOException {
     System.out.print(PCOND);
     if (active_tree) {
@@ -719,6 +803,8 @@ public class Parser {
     }
   }
 
+  //[35] <HpCond> -> AND <SimpleCond> <HpCond>
+  //[36] <HpCond> -> EPSILON
   private ParseTree hpCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.AND)) {
       System.out.print(HPCOND_AND);
@@ -746,6 +832,8 @@ public class Parser {
     }
   }
 
+  //[37] <LpCond> -> OR <PCond> <LpCond>
+  //[38] <LpCond> -> EPSILON
   private ParseTree lpCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.OR)) {
       System.out.print(LPCOND_OR);
@@ -773,6 +861,8 @@ public class Parser {
     }
   }
 
+  //[39] <SimpleCond> -> NOT <SimpleCond>
+  //[40] <SimpleCond> -> <ExprArith> <Comp> <ExprArith>
   private ParseTree simpleCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.NOT)) {
       System.out.print(SIMPLECOND_NOT);
@@ -804,6 +894,12 @@ public class Parser {
     }
   }
 
+  //[41] <Comp>	-> EQ
+  //[42] <Comp> -> GEQ
+  //[43] <Comp> -> GT
+  //[44] <Comp> -> LEQ
+  //[45] <Comp> -> LT
+  //[46] <Comp> -> NEQ
   private ParseTree comp() throws IOException {
     switch(lookahead.getType()) {
       case EQ:
@@ -878,6 +974,7 @@ public class Parser {
     }
   }
 
+  //[47] <While> -> WHILE <Cond> DO <Code> ENDWHILE
   private ParseTree parse_while() throws IOException {
     System.out.print(WHILE);
     if (active_tree) {
@@ -901,6 +998,7 @@ public class Parser {
     }
   }
 
+  //[48] <For> -> FOR [VarName] ASSIGN <ExprArith> TO <ExprArith> DO <Code> ENDFOR
   private ParseTree parse_for() throws IOException {
     System.out.print(FOR);
     if (active_tree) {
@@ -932,6 +1030,7 @@ public class Parser {
     }
   }
 
+  //[49] <Print> -> PRINT LPAREN <ExprList> RPAREN
   private ParseTree parse_print() throws IOException {
     System.out.print(PRINT);
     if (active_tree) {
@@ -951,6 +1050,7 @@ public class Parser {
     }
   }
 
+  //[50] <Read> -> READ LPAREN <VarList> RPAREN
   private ParseTree parse_read() throws IOException {
     System.out.print(READ);
     if (active_tree) {
@@ -970,6 +1070,7 @@ public class Parser {
     }
   }
 
+  //[51] <ExpList> -> <ExprArith> <ExpListEnd>
   private ParseTree exprList() throws IOException {
     System.out.print(EXPLIST);
     if (active_tree) {
@@ -985,6 +1086,8 @@ public class Parser {
     }
   }
 
+  //[52] <ExpListEnd> -> COMMA <ExpList>
+  //[53] <ExpListEnd> -> EPSILON
   private ParseTree expListEnd() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.COMMA)) {
       System.out.print(EXPLISTEND);
