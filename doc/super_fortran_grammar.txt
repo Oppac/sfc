@@ -51,5 +51,5 @@ Transformed Super-Fortran Grammar
 [49] <Print>		  -> PRINT LPAREN <ExprList> RPAREN
 [50] <Read>		  -> READ LPAREN <VarList> RPAREN
 [51] <ExpList>		  -> <ExprArith> <ExpListEnd>
-[52] <ExpListEnd>	  -> EPSILON
-[53] 			  -> COMMA <ExpList>
+[52] <ExpListEnd>	  -> COMMA <ExpList>
+[53] 			  -> EPSILON
