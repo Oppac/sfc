@@ -1,0 +1,6 @@
+BEGINPROG Derivation
+
+PRINT(3 + 3 + 3 + 3)
+PRINT(3 + 5 * 2)
+
+ENDPROG
