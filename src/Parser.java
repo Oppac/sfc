@@ -17,7 +17,7 @@ public class Parser {
   private static String VARIABLES_EPSILON;
   private static String VARLIST;
   private static String VARLISTEND;
-  privare static String VARLISTEND_EPSILON;
+  private static String VARLISTEND_EPSILON;
   private static String CODE;
   private static String CODE_EPSILON;
   private static String INSTRUCTION_ASSIGN;
@@ -134,7 +134,7 @@ public class Parser {
       this.VARLISTEND = "5 ";
       this.VARLISTEND_EPSILON = "6 ";
       this.CODE = "7 ";
-      this.CODE_EPSILON = "8 "
+      this.CODE_EPSILON = "8 ";
       this.INSTRUCTION_ASSIGN = "9 ";
       this.INSTRUCTION_IF = "10 ";
       this.INSTRUCTION_WHILE = "11 ";
