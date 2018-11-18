@@ -496,12 +496,14 @@ public class Parser {
           if (active_tree) {
             List<ParseTree> treeList = Arrays.asList(
             lpOp(),
-            hpProd()
+            hpProd(),
+            lpExpr()
             );
             return new ParseTree("LpExpr", treeList);
           } else {
             lpOp();
             hpProd();
+            lpExpr();
             return null;
           }
     } else {
