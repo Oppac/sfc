@@ -45,10 +45,6 @@ public class Symbol{
 		return this.value.equals("EPSILON");
 	}
 
-	public boolean isEOS() {
-		return this.type.equals(LexicalUnit.EOS);
-	}
-
 	public String toTeX() {
 			if (this.isEpsilon()){
 					return "$\\varepsilon$";
