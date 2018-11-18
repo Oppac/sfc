@@ -1,6 +1,6 @@
 ,BEGINPROG,PROGNAME,ENDLINE,ENDPROG,VARIABLES,EPSILON,VARNAME,NUMBER,COMMA,ASSIGN,LPAREN,RPAREN,PLUS,MINUS,TIMES,DIVIDE,IF,THEN,ENDIF,ELSE,DO,AND,OR,NOT,EQ,GEQ,GT,LEQ,LT,NEQ,WHILE,ENDWHILE,FOR,TO,ENDFOR,PRINT,READ
 Program,1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-Variables,,,,,3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Variables,,,,,2,3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 VarList,,,,,,,4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 VarListEnd,,,5,,,5,,,6,,,5,,,,,,,,,,,,,,,,,,,,,,,,,
 Code,,,8,8,,8,7,,,,,,,,,,7,,8,,,,,,,,,,,,7,8,7,,8,7,7
