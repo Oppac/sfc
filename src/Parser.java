@@ -13,13 +13,13 @@ public class Parser {
   public boolean active_tree;
 
   private static String PROGRAM;
-  private static String EPSILON;
   private static String VARIABLES;
   private static String VARIABLES_EPSILON;
   private static String VARLIST;
   private static String VARLISTEND;
-  private static String VARLISTEND_EPSILON;
+  privare static String VARLISTEND_EPSILON;
   private static String CODE;
+  private static String CODE_EPSILON;
   private static String INSTRUCTION_ASSIGN;
   private static String INSTRUCTION_IF;
   private static String INSTRUCTION_WHILE;
@@ -74,13 +74,13 @@ public class Parser {
 
     if (verbose) {
       this.PROGRAM = "PROGRAM ";
-      this.EPSILON = "EPSILON ";
       this.VARIABLES = "VARIABLES ";
       this.VARIABLES_EPSILON = "VARIABLES_EPSILON ";
       this.VARLIST = "VARLIST ";
-      this.VARLISTEND = "VARLISTEND " ;
+      this.VARLISTEND = "VARLISTEND ";
       this.VARLISTEND_EPSILON = "VARLISTEND_EPSILON ";
       this.CODE = "CODE ";
+      this.CODE_EPSILON = "CODE_EPSILON";
       this.INSTRUCTION_ASSIGN = "INSTRUCTION_ASSIGN ";
       this.INSTRUCTION_IF = "INSTRUCTION_IF ";
       this.INSTRUCTION_WHILE = "INSTRUCTION_WHILE ";
@@ -128,13 +128,13 @@ public class Parser {
       this.EXPLISTEND_EPSILON = "EXPLISTEND_EPSILON ";
     } else {
       this.PROGRAM = "1 ";
-      this.EPSILON = "2 ";
-      this.VARIABLES = "3 ";
-      this.VARIABLES_EPSILON = "4 ";
-      this.VARLIST = "5 ";
-      this.VARLISTEND = "6 ";
-      this.VARLISTEND_EPSILON = "7 ";
-      this.CODE = "8 ";
+      this.VARIABLES = "2 ";
+      this.VARIABLES_EPSILON = "3 ";
+      this.VARLIST = "4 ";
+      this.VARLISTEND = "5 ";
+      this.VARLISTEND_EPSILON = "6 ";
+      this.CODE = "7 ";
+      this.CODE_EPSILON = "8 "
       this.INSTRUCTION_ASSIGN = "9 ";
       this.INSTRUCTION_IF = "10 ";
       this.INSTRUCTION_WHILE = "11 ";

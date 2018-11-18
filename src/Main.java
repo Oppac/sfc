@@ -58,7 +58,6 @@ public class Main {
           outputFile.write(parserTree.toLaTeX());
           outputFile.close();
         } catch (Exception e) {
-          e.printStackTrace();
           System.err.println("Failed to draw tree");
         }
       } else {
