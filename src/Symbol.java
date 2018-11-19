@@ -47,7 +47,7 @@ public class Symbol{
 
 	public String toTeX() {
 			if (this.isEpsilon()){
-					return "$\\varepsilon$";
+					return "$\\epsilon$";
 			} else {
 				return this.value.toString();
 			}
