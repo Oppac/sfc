@@ -968,7 +968,7 @@ public class Parser {
         }
       default:
         throw new Error("\nError at line " + lookahead.getLine() + ": " +
-        lookahead.getType() + " expected a comparaison operator");
+        lookahead.getType() + " expected a comparison operator");
     }
   }
 
