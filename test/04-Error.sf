@@ -1,21 +1,19 @@
 // Incorrect program to test errors
+// Illegal endline after "to" in for loop
 
-
-BEGINPROG Arith
-
-  VARIABLES a, b, c
-
-  
-  a := 5 * 4 + 2 * 5
-  b := a * a * a + 2
-  c := ((5 + 4) * 2) / 1
-  a := a + b / c
-
-
-  PRINT (a, b , c, 5, (2 + 2))
-
-  WHILE a > b DO
-  a
-  ENDWHILE 
+BEGINPROG Error
+VARIABLES number, result 
+  READ(number)
+  result := (3 + 4 * 2
+  IF (number >= 0) THEN
+    FOR i := 1 TO 
+      number DO				//Error
+      result := result * i
+    ENDFOR
+    PRINT(result)
+  ELSE      
+    PRINT(-1)
+  ENDIF
 
 ENDPROG
+
