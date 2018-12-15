@@ -16,7 +16,7 @@ public class Main {
   */
   public static void main(String[] args) {
     boolean verbose = false;
-    boolean tree = false;
+    boolean tree = true;
     String output = "None";
 
     if (args.length < 1 || args.length > 4) {
@@ -58,19 +58,15 @@ public class Main {
       Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose, tree);
       //If write tree is active, get the ParseTree from the parser and write it at the specified output
       if (tree) {
-        ParseTree parserTree = parser.startParse();
-        try {
-          BufferedWriter outputFile = new BufferedWriter(new FileWriter(output));
-          outputFile.write(parserTree.toLaTeX());
-          outputFile.close();
-        } catch (Exception e) {
-          System.err.println("Failed to draw tree");
-        }
+        AbstractSyntaxTree parserTree = parser.startParse();
+        String tree_string = parserTree.print_tree();
+        System.out.println(tree_string);
       //Otherwise, do the parse without collecting the ParseTree
       } else {
         parser.startParse();
       }
     } catch (Exception e) {
+      e.printStackTrace();
       System.err.println("Failed to compile " + filePath);
     }
   }

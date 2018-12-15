@@ -19,4 +19,20 @@ public class AbstractSyntaxTree {
     this.label = label;
     this.children = children;
   }
+
+  public String print_tree() {
+      StringBuilder treeTeX = new StringBuilder();
+      treeTeX.append("(");
+      if (node_to_remove != true) {
+        treeTeX.append(label);
+        treeTeX.append(" ");
+        if (children != null) {
+            for (AbstractSyntaxTree child: children) {
+                treeTeX.append(child.print_tree());
+              }
+            }
+        treeTeX.append(")");
+      }
+      return treeTeX.toString();
+  }
 }
