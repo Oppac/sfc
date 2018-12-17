@@ -1,3 +1,3 @@
 
-Super Fortran Lexer and Parser
+Super Fortran Lexer (using JFlex) + Parser + Code Generator (using LLVM)
 
