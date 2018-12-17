@@ -4,15 +4,18 @@ import java.util.List;
 public class AbstractSyntaxTree {
 
   private String label;
-  private List<AbstractSyntaxTree> children;
-  private boolean node_to_remove = false;
+  private AbstractSyntaxTree parent;
+  private List<AbstractSyntaxTree> children = new ArrayList<AbstractSyntaxTree>();
 
   public AbstractSyntaxTree() {
-    this.node_to_remove = true;
   }
 
   public AbstractSyntaxTree(String label) {
     this.label = label;
+  }
+
+  public AbstractSyntaxTree(List<AbstractSyntaxTree> children) {
+    this.children = children;
   }
 
   public AbstractSyntaxTree(String label, List<AbstractSyntaxTree> children) {
@@ -20,19 +23,36 @@ public class AbstractSyntaxTree {
     this.children = children;
   }
 
+  public void add_child(AbstractSyntaxTree child) {
+    System.out.println(child.print_tree());
+    this.children.add(child);
+  }
+
+ /*
+  public void clean_tree() {
+    if ((label == null) && (children != null)) {
+      List<AbstractSyntaxTree> children
+      parent.children.addAll(children);
+    }
+    if (children != null) {
+      for (AbstractSyntaxTree child: children) {
+          child.clean_tree();
+      }
+    }
+  }
+  */
+
   public String print_tree() {
       StringBuilder treeTeX = new StringBuilder();
-      treeTeX.append("(");
-      if (node_to_remove != true) {
-        treeTeX.append(label);
-        treeTeX.append(" ");
-        if (children != null) {
-            for (AbstractSyntaxTree child: children) {
-                treeTeX.append(child.print_tree());
-              }
-            }
-        treeTeX.append(")");
+      treeTeX.append("{");
+      treeTeX.append(label);
+      treeTeX.append(" ");
+      if (children != null) {
+          for (AbstractSyntaxTree child: children) {
+              treeTeX.append(child.print_tree());
+          }
       }
+      treeTeX.append("}");
       return treeTeX.toString();
   }
 }

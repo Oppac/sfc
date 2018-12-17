@@ -59,6 +59,7 @@ public class Main {
       //If write tree is active, get the ParseTree from the parser and write it at the specified output
       if (tree) {
         AbstractSyntaxTree parserTree = parser.startParse();
+        //parserTree.clean_tree();
         String tree_string = parserTree.print_tree();
         System.out.println(tree_string);
       //Otherwise, do the parse without collecting the ParseTree
