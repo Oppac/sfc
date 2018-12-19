@@ -62,6 +62,8 @@ public class Main {
         //parserTree.clean_tree();
         String tree_string = parserTree.print_tree();
         System.out.println(tree_string);
+        CodeGenerator generator = new CodeGenerator(parserTree);
+        generator.generateCode();
       //Otherwise, do the parse without collecting the ParseTree
       } else {
         parser.startParse();

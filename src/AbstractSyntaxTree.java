@@ -24,35 +24,37 @@ public class AbstractSyntaxTree {
   }
 
   public void add_child(AbstractSyntaxTree child) {
-    System.out.println(child.print_tree());
     this.children.add(child);
   }
 
- /*
-  public void clean_tree() {
-    if ((label == null) && (children != null)) {
-      List<AbstractSyntaxTree> children
-      parent.children.addAll(children);
-    }
-    if (children != null) {
-      for (AbstractSyntaxTree child: children) {
-          child.clean_tree();
-      }
-    }
+  public void add_child(List<AbstractSyntaxTree> children) {
+    this.children.addAll(children);
   }
-  */
+
+  public String getLabel() {
+      return this.label;
+  }
+
+  public AbstractSyntaxTree getChild(int n) {
+    return children.get(n);
+  }
+
+  public List<AbstractSyntaxTree> getChildren() {
+    return this.children;
+  }
+
 
   public String print_tree() {
       StringBuilder treeTeX = new StringBuilder();
-      treeTeX.append("{");
+      treeTeX.append("\n{");
       treeTeX.append(label);
-      treeTeX.append(" ");
       if (children != null) {
           for (AbstractSyntaxTree child: children) {
               treeTeX.append(child.print_tree());
           }
       }
-      treeTeX.append("}");
+      treeTeX.append("}\n");
       return treeTeX.toString();
   }
+
 }
