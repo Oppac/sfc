@@ -24,7 +24,7 @@ public class CodeGenerator {
 
   public void printCode(AbstractSyntaxTree code) {
     if (code.getLabel() == "Assign") {
-      System.out.println("Assssignement");
+      System.out.println(generateAssign(code));
     } else if (code.getLabel() == "Read") {
       System.out.println(generateRead(code));
     } else if (code.getLabel() == "Print") {
@@ -36,6 +36,7 @@ public class CodeGenerator {
     }
   }
 
+  //To keep or not ?
   public String computeExprArith(AbstractSyntaxTree exprArith) {
     return exprArith.getChild(0).getLabel();
   }
@@ -49,6 +50,19 @@ public class CodeGenerator {
       llvmCode += "%" + varName + " = alloca i32\n";
       symbolicTable.put(varName, null);
       i++;
+    }
+    return llvmCode;
+  }
+
+  public String generateAssign(AbstractSyntaxTree assign) {
+    System.out.println("\n<Assign>");
+    int i = 0;
+    String llvmCode = "";
+    if (symbolicTable.containsKey(assign.getChild(0).getLabel())) {
+      String varName = computeExprArith(assign.getChild(1));
+      llvmCode += "store i32 %" + assign.getChild(0).getLabel() + ", i32* %" + varName + "\n";
+    } else {
+      System.out.println("Variable not declared");
     }
     return llvmCode;
   }
