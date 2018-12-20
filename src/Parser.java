@@ -78,11 +78,10 @@ public class Parser {
   * endlines are.
   * @return a "SkipLines" node for the AbstractSyntaxTree.
   */
-  private AbstractSyntaxTree skipEndline() throws IOException {
+  private void skipEndline() throws IOException {
     while (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
       nextToken();
     }
-    return new AbstractSyntaxTree();
   }
 
   /**
@@ -105,7 +104,7 @@ public class Parser {
     skipEndline();
     ast.add_child(variables());
     skipEndline();
-    code();
+    ast.add_child(code());
     skipEndline();
     compareToken(LexicalUnit.ENDPROG);
     skipEndline();
@@ -150,6 +149,7 @@ public class Parser {
   //[07] <Code> -> <Instruction> [EndLine] <Code>
   //[08] <Code> -> EPSILON
   private AbstractSyntaxTree code() throws IOException {
+    AbstractSyntaxTree ast = new AbstractSyntaxTree("Code");
     switch(lookahead.getType()) {
       case VARNAME:
       case IF:
@@ -157,14 +157,12 @@ public class Parser {
       case FOR:
       case PRINT:
       case READ:
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        instruction(),
-        skipEndline(),
-        code()
-        );
-        return new AbstractSyntaxTree("Code", treeList);
+        ast.add_child(instruction());
+        skipEndline();
+        ast.add_child(code());
+        return ast;
       default:
-        return new AbstractSyntaxTree();
+        return ast;
     }
   }
 
@@ -177,79 +175,74 @@ public class Parser {
   private AbstractSyntaxTree instruction() throws IOException {
     switch(lookahead.getType()) {
       case VARNAME:
-        return new AbstractSyntaxTree(Arrays.asList(assign()));
+        return new AbstractSyntaxTree("Assign", assign());
       case IF:
-        return new AbstractSyntaxTree(Arrays.asList(parse_if()));
+        return new AbstractSyntaxTree("If", parse_if());
       case WHILE:
-        return new AbstractSyntaxTree(Arrays.asList(parse_while()));
+        return new AbstractSyntaxTree("While", parse_while());
       case FOR:
-        return new AbstractSyntaxTree(Arrays.asList(parse_for()));
+        return new AbstractSyntaxTree("For", parse_for());
       case PRINT:
-        return new AbstractSyntaxTree(Arrays.asList(parse_print()));
+        return new AbstractSyntaxTree("Print", parse_print());
       case READ:
-        return new AbstractSyntaxTree(Arrays.asList(parse_read()));
+        return new AbstractSyntaxTree("Read", parse_read());
       default:
         return new AbstractSyntaxTree();
     }
   }
 
   //[15] <Assign> -> [VarName] ASSIGN <ExprArith>
-  private AbstractSyntaxTree assign() throws IOException {
-    List<AbstractSyntaxTree> treeList = Arrays.asList(
-    compareTokenAdd(LexicalUnit.VARNAME),
-    compareToken(LexicalUnit.ASSIGN),
-    exprArith()
-    );
-    return new AbstractSyntaxTree("Assign", treeList);
+  private List<AbstractSyntaxTree> assign() throws IOException {
+    List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+    arr.add(compareTokenAdd(LexicalUnit.VARNAME));
+    compareToken(LexicalUnit.ASSIGN);
+    arr.add(exprArith());
+    return arr;
   }
 
   //[16] <ExprArith> -> <HpProd> <LpExpr>
   private AbstractSyntaxTree exprArith() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      hpProd(),
-      lpExpr()
-      );
-      return new AbstractSyntaxTree("ExprArith", treeList);
+      AbstractSyntaxTree ast = new AbstractSyntaxTree("Expr");
+      ast.add_child(hpProd());
+      ast.add_child(lpExpr());
+      return ast;
     }
 
     //[17] <HpProd> -> <SimpleExpr> <HpExpr>
     private AbstractSyntaxTree hpProd() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      simpleExpr(),
-      hpExpr()
-      );
-      return new AbstractSyntaxTree(treeList);
+      AbstractSyntaxTree ast = new AbstractSyntaxTree("Expr");
+      ast.add_child(simpleExpr());
+      ast.add_child(hpExpr());
+      return ast;
     }
 
     //[18] <HpExpr> -> <HpOp> <SimpleExpr> <HpExpr>
     //[19] <HpExpr> -> EPSILON
-    private AbstractSyntaxTree hpExpr() throws IOException {
+    private List<AbstractSyntaxTree> hpExpr() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.TIMES) ||
       lookahead.getType().equals(LexicalUnit.DIVIDE)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        hpOp(),
-        simpleExpr(),
-        hpExpr()
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        arr.addAll(hpOp());
+        arr.addAll(simpleExpr());
+        arr.addAll(hpExpr());
+        return arr;
       } else {
-        return new AbstractSyntaxTree();
+        return new ArrayList<AbstractSyntaxTree>();
       }
     }
 
     //[20] <LpExpr> -> <LpOp> <HpProd> <LpExpr>
     //[21] <LpExpr> -> EPSILON
-    private AbstractSyntaxTree lpExpr() throws IOException {
+    private List<AbstractSyntaxTree> lpExpr() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.PLUS) ||
       lookahead.getType().equals(LexicalUnit.MINUS)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        lpOp(),
-        hpProd(),
-        lpExpr()
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        arr.addAll(lpOp());
+        arr.add(hpProd());
+        arr.addAll(lpExpr());
+        return arr;
       } else {
-        return new AbstractSyntaxTree();
+        return new ArrayList<AbstractSyntaxTree>();
       }
     }
 
@@ -257,31 +250,27 @@ public class Parser {
     //[23] <SimpleExpr> -> [Number]
     //[24] <SimpleExpr>	-> LPAREN <ExprArith> RPAREN
     //[25] <SimpleExpr>	-> MINUS <SimpleExpr>
-    private AbstractSyntaxTree simpleExpr() throws IOException {
+    private List<AbstractSyntaxTree> simpleExpr() throws IOException {
       switch(lookahead.getType()) {
         case VARNAME:
-          List<AbstractSyntaxTree> treeList_VARNAME = Arrays.asList(
-          compareTokenAdd(LexicalUnit.VARNAME)
-          );
-          return new AbstractSyntaxTree(treeList_VARNAME);
+          List<AbstractSyntaxTree> arr1 = new ArrayList<AbstractSyntaxTree>();
+          arr1.add(compareTokenAdd(LexicalUnit.VARNAME));
+          return arr1;
         case NUMBER:
-          List<AbstractSyntaxTree> treeList_NUMBER = Arrays.asList(
-          compareTokenAdd(LexicalUnit.NUMBER)
-          );
-          return new AbstractSyntaxTree(treeList_NUMBER);
+          List<AbstractSyntaxTree> arr2 = new ArrayList<AbstractSyntaxTree>();
+          arr2.add(compareTokenAdd(LexicalUnit.NUMBER));
+          return arr2;
         case LPAREN:
-          List<AbstractSyntaxTree> treeList_LPAREN = Arrays.asList(
-          compareToken(LexicalUnit.LPAREN),
-          exprArith(),
-          compareToken(LexicalUnit.RPAREN)
-          );
-          return new AbstractSyntaxTree(treeList_LPAREN);
+          List<AbstractSyntaxTree> arr3 = new ArrayList<AbstractSyntaxTree>();
+          compareToken(LexicalUnit.LPAREN);
+          arr3.add(exprArith());
+          compareToken(LexicalUnit.RPAREN);
+          return arr3;
         case MINUS:
-          List<AbstractSyntaxTree> treeList_MINUS = Arrays.asList(
-          compareTokenAdd(LexicalUnit.MINUS),
-          exprArith()
-          );
-          return new AbstractSyntaxTree(treeList_MINUS);
+          List<AbstractSyntaxTree> arr4 = new ArrayList<AbstractSyntaxTree>();
+          arr4.add(compareTokenAdd(LexicalUnit.MINUS));
+          arr4.addAll(simpleExpr());
+          return arr4;
         default:
           throw new Error("\nError at line " + lookahead.getLine() + ": " +
           lookahead.getType() + " expected a number, a variable or an arithmetic expression");
@@ -290,17 +279,15 @@ public class Parser {
 
     //[26] <LpOp> -> PLUS
     //[27] <LpOp> -> MINUS
-    private AbstractSyntaxTree lpOp() throws IOException {
+    private List<AbstractSyntaxTree> lpOp() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.PLUS)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareTokenAdd(LexicalUnit.PLUS)
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        arr.add(compareTokenAdd(LexicalUnit.PLUS));
+        return arr;
       } else if (lookahead.getType().equals(LexicalUnit.MINUS)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareTokenAdd(LexicalUnit.MINUS)
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        arr.add(compareTokenAdd(LexicalUnit.MINUS));
+        return arr;
       } else {
         throw new Error("\nError at line " + lookahead.getLine() + ": " +
         lookahead.getType() + " expected addition or substraction operator");
@@ -309,17 +296,15 @@ public class Parser {
 
     //[28] <HpOp> -> TIMES
     //[29] <HpOp> -> DIVIDE
-    private AbstractSyntaxTree hpOp() throws IOException {
+    private List<AbstractSyntaxTree> hpOp() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.TIMES)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareTokenAdd(LexicalUnit.TIMES)
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        arr.add(compareTokenAdd(LexicalUnit.TIMES));
+        return arr;
       } else if (lookahead.getType().equals(LexicalUnit.DIVIDE)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareTokenAdd(LexicalUnit.DIVIDE)
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        arr.add(compareTokenAdd(LexicalUnit.DIVIDE));
+        return arr;
       } else {
         throw new Error("\nError at line " + lookahead.getLine() + ": " +
         lookahead.getType() + " expected multiplication or division operator");
@@ -327,33 +312,31 @@ public class Parser {
     }
 
     //[30] <If> -> IF <Cond> THEN <Code> <IfElse> ENDIF
-    private AbstractSyntaxTree parse_if() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      compareTokenAdd(LexicalUnit.IF),
-      compareToken(LexicalUnit.LPAREN),
-      cond(),
-      compareToken(LexicalUnit.RPAREN),
-      compareToken(LexicalUnit.THEN),
-      skipEndline(),
-      code(),
-      ifElse(),
-      compareToken(LexicalUnit.ENDIF)
-      );
-      return new AbstractSyntaxTree("If", treeList);
+    private List<AbstractSyntaxTree> parse_if() throws IOException {
+      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+      compareTokenAdd(LexicalUnit.IF);
+      compareToken(LexicalUnit.LPAREN);
+      arr.add(cond());
+      compareToken(LexicalUnit.RPAREN);
+      compareToken(LexicalUnit.THEN);
+      skipEndline();
+      arr.add(code());
+      arr.addAll(ifElse());
+      compareToken(LexicalUnit.ENDIF);
+      return arr;
     }
 
     //[31] <IfElse> -> ELSE [EndLine] <Code>
     //[32] <IfElse> -> EPSILON
-    private AbstractSyntaxTree ifElse() throws IOException {
+    private List<AbstractSyntaxTree> ifElse() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.ELSE)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareTokenAdd(LexicalUnit.ELSE),
-        compareToken(LexicalUnit.ENDLINE),
-        code()
-        );
-        return new AbstractSyntaxTree("IfElse", treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        compareTokenAdd(LexicalUnit.ELSE);
+        compareToken(LexicalUnit.ENDLINE);
+        arr.add(code());
+        return arr;
       } else {
-        return new AbstractSyntaxTree();
+        return new ArrayList<AbstractSyntaxTree>();
       }
     }
 
@@ -416,9 +399,9 @@ public class Parser {
         return new AbstractSyntaxTree(treeList);
       } else {
         List<AbstractSyntaxTree> treeList = Arrays.asList(
-        exprArith(),
-        comp(),
-        exprArith()
+        //exprArith(),
+        comp()
+        //exprArith()
         );
         return new AbstractSyntaxTree(treeList);
       }
@@ -451,77 +434,71 @@ public class Parser {
     }
 
     //[47] <While> -> WHILE <Cond> DO <Code> ENDWHILE
-    private AbstractSyntaxTree parse_while() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      compareTokenAdd(LexicalUnit.WHILE),
-      cond(),
-      compareToken(LexicalUnit.DO),
-      skipEndline(),
-      code(),
-      compareToken(LexicalUnit.ENDWHILE)
-      );
-      return new AbstractSyntaxTree("While", treeList);
+    private List<AbstractSyntaxTree> parse_while() throws IOException {
+      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+      compareToken(LexicalUnit.WHILE);
+      arr.add(cond());
+      compareToken(LexicalUnit.DO);
+      skipEndline();
+      arr.add(code());
+      compareToken(LexicalUnit.ENDWHILE);
+      return arr;
     }
 
     //[48] <For> -> FOR [VarName] ASSIGN <ExprArith> TO <ExprArith> DO <Code> ENDFOR
-    private AbstractSyntaxTree parse_for() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      compareTokenAdd(LexicalUnit.FOR),
-      compareTokenAdd(LexicalUnit.VARNAME),
-      compareTokenAdd(LexicalUnit.ASSIGN),
-      exprArith(),
-      compareToken(LexicalUnit.TO),
-      exprArith(),
-      compareToken(LexicalUnit.DO),
-      skipEndline(),
-      code(),
-      compareToken(LexicalUnit.ENDFOR)
-      );
-      return new AbstractSyntaxTree("For", treeList);
+    private List<AbstractSyntaxTree> parse_for() throws IOException {
+      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+      compareToken(LexicalUnit.FOR);
+      compareTokenAdd(LexicalUnit.VARNAME);
+      compareToken(LexicalUnit.ASSIGN);
+      arr.add(exprArith());
+      compareToken(LexicalUnit.TO);
+      arr.add(exprArith());
+      compareToken(LexicalUnit.DO);
+      skipEndline();
+      arr.add(code());
+      compareToken(LexicalUnit.ENDFOR);
+      return arr;
     }
 
     //[49] <Print> -> PRINT LPAREN <ExprList> RPAREN
-    private AbstractSyntaxTree parse_print() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      compareTokenAdd(LexicalUnit.PRINT),
-      compareToken(LexicalUnit.LPAREN),
-      exprList(),
-      compareToken(LexicalUnit.RPAREN)
-      );
-      return new AbstractSyntaxTree("Print", treeList);
+    private List<AbstractSyntaxTree> parse_print() throws IOException {
+      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+      compareTokenAdd(LexicalUnit.PRINT);
+      compareToken(LexicalUnit.LPAREN);
+      arr.addAll(exprList());
+      compareToken(LexicalUnit.RPAREN);
+      return arr;
     }
 
     //[50] <Read> -> READ LPAREN <VarList> RPAREN
-    private AbstractSyntaxTree parse_read() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      compareTokenAdd(LexicalUnit.READ),
-      compareToken(LexicalUnit.LPAREN),
-      //varlist(),
-      compareToken(LexicalUnit.RPAREN)
-      );
-      return new AbstractSyntaxTree("Read", treeList);
+    private List<AbstractSyntaxTree> parse_read() throws IOException {
+      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+      compareTokenAdd(LexicalUnit.READ);
+      compareToken(LexicalUnit.LPAREN);
+      arr.addAll(varlist());
+      compareToken(LexicalUnit.RPAREN);
+      return arr;
     }
 
     //[51] <ExpList> -> <ExprArith> <ExpListEnd>
-    private AbstractSyntaxTree exprList() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      exprArith(),
-      expListEnd()
-      );
-      return new AbstractSyntaxTree(treeList);
+    private List<AbstractSyntaxTree> exprList() throws IOException {
+      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+      arr.add(exprArith());
+      arr.addAll(expListEnd());
+      return arr;
     }
 
     //[52] <ExpListEnd> -> COMMA <ExpList>
     //[53] <ExpListEnd> -> EPSILON
-    private AbstractSyntaxTree expListEnd() throws IOException {
+    private List<AbstractSyntaxTree> expListEnd() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.COMMA)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareToken(LexicalUnit.COMMA),
-        exprList()
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        compareToken(LexicalUnit.COMMA);
+        arr.addAll(exprList());
+        return arr;
       } else {
-        return new AbstractSyntaxTree();
+        return new ArrayList<AbstractSyntaxTree>();
       }
     }
 
