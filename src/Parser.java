@@ -209,11 +209,11 @@ public class Parser {
     }
 
     //[17] <HpProd> -> <SimpleExpr> <HpExpr>
-    private AbstractSyntaxTree hpProd() throws IOException {
-      AbstractSyntaxTree ast = new AbstractSyntaxTree("Expr");
-      ast.add_child(simpleExpr());
-      ast.add_child(hpExpr());
-      return ast;
+    private List<AbstractSyntaxTree> hpProd() throws IOException {
+      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+      arr.addAll(simpleExpr());
+      arr.addAll(hpExpr());
+      return arr;
     }
 
     //[18] <HpExpr> -> <HpOp> <SimpleExpr> <HpExpr>
@@ -238,7 +238,7 @@ public class Parser {
       lookahead.getType().equals(LexicalUnit.MINUS)) {
         List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
         arr.addAll(lpOp());
-        arr.add(hpProd());
+        arr.addAll(hpProd());
         arr.addAll(lpExpr());
         return arr;
       } else {
@@ -342,68 +342,62 @@ public class Parser {
 
     //[33] <Cond> -> <PCond> <LpCond>
     private AbstractSyntaxTree cond() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      pCond(),
-      lpCond()
-      );
-      return new AbstractSyntaxTree("Cond", treeList);
+      AbstractSyntaxTree ast = new AbstractSyntaxTree("Cond");
+      ast.add_child(pCond());
+      ast.add_child(lpCond());
+      return ast;
     }
 
     //[34] <PCond> -> <SimpleCond> <HpCond>
-    private AbstractSyntaxTree pCond() throws IOException {
-      List<AbstractSyntaxTree> treeList = Arrays.asList(
-      simpleCond(),
-      hpCond()
-      );
-      return new AbstractSyntaxTree(treeList);
+    private List<AbstractSyntaxTree> pCond() throws IOException {
+      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+      arr.addAll(simpleCond());
+      arr.addAll(hpCond());
+      return arr;
     }
 
     //[35] <HpCond> -> AND <SimpleCond> <HpCond>
     //[36] <HpCond> -> EPSILON
-    private AbstractSyntaxTree hpCond() throws IOException {
+    private List<AbstractSyntaxTree> hpCond() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.AND)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareToken(LexicalUnit.AND),
-        simpleCond(),
-        hpCond()
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        compareToken(LexicalUnit.AND);
+        arr.addAll(simpleCond());
+        arr.addAll(hpCond());
+        return arr;
       } else {
-        return new AbstractSyntaxTree();
+        return new ArrayList<AbstractSyntaxTree>();
       }
     }
 
     //[37] <LpCond> -> OR <PCond> <LpCond>
     //[38] <LpCond> -> EPSILON
-    private AbstractSyntaxTree lpCond() throws IOException {
+    private List<AbstractSyntaxTree> lpCond() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.OR)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareToken(LexicalUnit.OR),
-        pCond(),
-        lpCond()
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        compareToken(LexicalUnit.OR);
+        arr.addAll(pCond());
+        arr.addAll(pCond());
+        return arr;
       } else {
-        return new AbstractSyntaxTree();
+        return new ArrayList<AbstractSyntaxTree>();
       }
     }
 
     //[39] <SimpleCond> -> NOT <SimpleCond>
     //[40] <SimpleCond> -> <ExprArith> <Comp> <ExprArith>
-    private AbstractSyntaxTree simpleCond() throws IOException {
+    private List<AbstractSyntaxTree> simpleCond() throws IOException {
       if (lookahead.getType().equals(LexicalUnit.NOT)) {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        compareTokenAdd(LexicalUnit.NOT),
-        simpleCond()
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        compareTokenAdd(LexicalUnit.NOT);
+        arr.addAll(simpleCond());
+        return arr;
       } else {
-        List<AbstractSyntaxTree> treeList = Arrays.asList(
-        //exprArith(),
-        comp()
-        //exprArith()
-        );
-        return new AbstractSyntaxTree(treeList);
+        List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
+        arr.add(exprArith());
+        arr.add(comp());
+        arr.add(exprArith());
+        return arr;
       }
     }
 
@@ -416,17 +410,17 @@ public class Parser {
     private AbstractSyntaxTree comp() throws IOException {
       switch(lookahead.getType()) {
         case EQ:
-        return new AbstractSyntaxTree(Arrays.asList(compareTokenAdd(LexicalUnit.EQ)));
+        return compareTokenAdd(LexicalUnit.EQ);
         case GEQ:
-        return new AbstractSyntaxTree(Arrays.asList(compareTokenAdd(LexicalUnit.GEQ)));
+        return compareTokenAdd(LexicalUnit.GEQ);
         case GT:
-        return new AbstractSyntaxTree(Arrays.asList(compareTokenAdd(LexicalUnit.GT)));
+        return compareTokenAdd(LexicalUnit.GT);
         case LEQ:
-        return new AbstractSyntaxTree(Arrays.asList(compareTokenAdd(LexicalUnit.LEQ)));
+        return compareTokenAdd(LexicalUnit.LEQ);
         case LT:
-        return new AbstractSyntaxTree(Arrays.asList(compareTokenAdd(LexicalUnit.LT)));
+        return compareTokenAdd(LexicalUnit.LT);
         case NEQ:
-        return new AbstractSyntaxTree(Arrays.asList(compareTokenAdd(LexicalUnit.NEQ)));
+        return compareTokenAdd(LexicalUnit.NEQ);
         default:
         throw new Error("\nError at line " + lookahead.getLine() + ": " +
         lookahead.getType() + " expected a comparison operator");
