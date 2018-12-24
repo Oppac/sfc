@@ -30,6 +30,10 @@ public class CodeGenerator {
       llvmCode += generateAssign(code);
     } else if (code.getLabel() == "If") {
       llvmCode += generateIf(code);
+    } else if (code.getLabel() == "While") {
+      llvmCode += generateWhile(code);
+    } else if (code.getLabel() == "For") {
+      llvmCode += generateFor(code);
     } else if (code.getLabel() == "Print") {
       llvmCode += generatePrint(code);
     } else if (code.getLabel() == "Read") {
@@ -100,6 +104,27 @@ public class CodeGenerator {
     llvmCode += "\niffalse" + i + ":\n";
     llvmCode += generateCode(ifGen.getChild(2).getChild(0));
     return llvmCode;
+  }
+
+  public String generateWhile(AbstractSyntaxTree whileGen) {
+  int i = 0;
+  String llvmCode = "";
+  llvmCode += "\n<While>\n";
+  llvmCode += generateCond(whileGen.getChild(0));
+  llvmCode += "br i1 %" + i + "," + " label %beginLoop" + i +
+   ", label %endLoop" + i + "\n";
+  llvmCode += "\nbeginLoop:\n";
+  llvmCode += generateCode(whileGen.getChild(1));
+  llvmCode += generateCond(whileGen.getChild(0));
+  llvmCode += "br i1 %" + i + "," + " label %beginLoop" + i +
+   ", label %endLoop" + i + "\n";
+  llvmCode += "\nendLoop\n";
+  return llvmCode;
+  }
+
+  public String generateFor(AbstractSyntaxTree forGen) {
+  String llvmCode = "";
+  return llvmCode;
   }
 
   public String generateRead(AbstractSyntaxTree read) {
