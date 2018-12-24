@@ -10,30 +10,36 @@ public class CodeGenerator {
     this.symbolicTable = new LinkedHashMap<String, Integer>();
   }
 
-  public void generateCode() {
+  public void generateLLVM() {
+    String llvmCode = "";
     for (AbstractSyntaxTree child: ast.getChildren()) {
       if (child.getLabel() == "Variables") {
-        System.out.println(createVariables(child));
+        llvmCode += createVariables(child);
       } else if (child.getLabel() == "Code") {
         for (AbstractSyntaxTree codeChild: child.getChildren()) {
-          printCode(codeChild);
+          llvmCode += generateCode(codeChild);
         }
       }
     }
+    System.out.println(llvmCode);
   }
 
-  public void printCode(AbstractSyntaxTree code) {
+  public String generateCode(AbstractSyntaxTree code) {
+    String llvmCode = "";
     if (code.getLabel() == "Assign") {
-      System.out.println(generateAssign(code));
-    } else if (code.getLabel() == "Read") {
-      System.out.println(generateRead(code));
+      llvmCode += generateAssign(code);
+    } else if (code.getLabel() == "If") {
+      llvmCode += generateIf(code);
     } else if (code.getLabel() == "Print") {
-      System.out.println(generatePrint(code));
+      llvmCode += generatePrint(code);
+    } else if (code.getLabel() == "Read") {
+      llvmCode += generateRead(code);
     } else if (code.getLabel() == "Code") {
         for (AbstractSyntaxTree codeChild: code.getChildren()) {
-          printCode(codeChild);
+          llvmCode += generateCode(codeChild);
         }
     }
+    return llvmCode;
   }
 
   //To keep or not ?
@@ -41,10 +47,15 @@ public class CodeGenerator {
     return exprArith.getChild(0).getLabel();
   }
 
+  public String generateCond(AbstractSyntaxTree cond) {
+    String llvmCode = "";
+    return llvmCode;
+  }
+
   public String createVariables(AbstractSyntaxTree vars) {
-    System.out.println("\n<Variables>");
     int i = 0;
     String llvmCode = "";
+    llvmCode += "\n<Variables>\n";
     for (AbstractSyntaxTree child: vars.getChildren()) {
       String varName = child.getLabel();
       llvmCode += "%" + varName + " = alloca i32\n";
@@ -55,9 +66,9 @@ public class CodeGenerator {
   }
 
   public String generateAssign(AbstractSyntaxTree assign) {
-    System.out.println("\n<Assign>");
     int i = 0;
     String llvmCode = "";
+    llvmCode += "\n<Assign>\n";
     if (symbolicTable.containsKey(assign.getChild(0).getLabel())) {
       String varName = computeExprArith(assign.getChild(1));
       llvmCode += "store i32 %" + assign.getChild(0).getLabel() + ", i32* %" + varName + "\n";
@@ -67,10 +78,34 @@ public class CodeGenerator {
     return llvmCode;
   }
 
-  public String generateRead(AbstractSyntaxTree read) {
-    System.out.println("\n<Read>");
+  public String generatePrint(AbstractSyntaxTree print) {
+    String llvmCode = "";
+    llvmCode += "\n<Print>\n";
+    for (AbstractSyntaxTree child: print.getChildren()) {
+      String varName = computeExprArith(child);
+      llvmCode += "call void @println(i32* %" + varName + ")" + "\n";
+    }
+    return llvmCode;
+  }
+
+  public String generateIf(AbstractSyntaxTree ifGen) {
     int i = 0;
     String llvmCode = "";
+    llvmCode += "\n<IF>\n";
+    llvmCode += generateCond(ifGen.getChild(0));
+    llvmCode += "br i1 %" + i + "," + "label %iftrue" + i +
+     ", label %iffalse" + i + "\n";
+    llvmCode += "\niftrue" + i + ":\n";
+    llvmCode += generateCode(ifGen.getChild(1).getChild(0));
+    llvmCode += "\niffalse" + i + ":\n";
+    llvmCode += generateCode(ifGen.getChild(2).getChild(0));
+    return llvmCode;
+  }
+
+  public String generateRead(AbstractSyntaxTree read) {
+    int i = 0;
+    String llvmCode = "";
+    llvmCode += "\n<Read>\n";
     for (AbstractSyntaxTree child: read.getChildren()) {
       String varName = child.getLabel();
       llvmCode += "%" + i + "= call i32 @readInt()\n";
@@ -80,15 +115,6 @@ public class CodeGenerator {
     return llvmCode;
   }
 
-  public String generatePrint(AbstractSyntaxTree print) {
-    System.out.println("\n<Print>");
-    String llvmCode = "";
-    for (AbstractSyntaxTree child: print.getChildren()) {
-      String varName = computeExprArith(child);
-      llvmCode += "call void @println(i32* %" + varName + ")" + "\n";
-    }
-    return llvmCode;
-  }
 
 
 }
