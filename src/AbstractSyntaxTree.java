@@ -47,7 +47,6 @@ public class AbstractSyntaxTree {
     return this.children;
   }
 
-
   public void removeEpsilons() {
     List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
     for (AbstractSyntaxTree child: children) {

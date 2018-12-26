@@ -46,9 +46,32 @@ public class CodeGenerator {
     return llvmCode;
   }
 
-  //To keep or not ?
+  //To do the i
   public String computeExprArith(AbstractSyntaxTree exprArith) {
-    return exprArith.getChild(0).getLabel();
+    String llvmCode = "";
+    int i = 0;
+    for (AbstractSyntaxTree child: exprArith.getChildren()) {
+      System.out.println(child.getChildren().size());
+      if (child.getChildren().size() == 1) {
+        llvmCode += computeExprArith(child.getChild(0));
+        i++;
+      } else if (child.getChildren().size() == 2) {
+        llvmCode += computeExprArith(child.getChild(0));
+        i++;
+        llvmCode += computeExprArith(child.getChild(1));
+        i++;
+      }
+      if (value == "+") {
+        llvmCode += "% " + i + " = add i32 %" + i + ", %" + i;
+      } else if (value == "-") {
+        llvmCode += "% " + i + " = sub i32 %" + i + ", %" + i;
+      } else if (value == "*") {
+        llvmCode += "% " + i + " = mul i32 %" + i + ", %" + i;
+      } else if (value == "/") {
+        llvmCode += "% " + i + " = sdiv i32 %" + i + ", %" + i;
+      }
+    }
+    return llvmCode;
   }
 
   public String generateCond(AbstractSyntaxTree cond) {
@@ -156,7 +179,5 @@ public class CodeGenerator {
     }
     return llvmCode;
   }
-
-
 
 }
