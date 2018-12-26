@@ -23,11 +23,15 @@ public class AbstractSyntaxTree {
     this.children = children;
   }
 
-  public void add_child(AbstractSyntaxTree child) {
+  public void addLabel(String label) {
+    this.label = label;
+  }
+
+  public void addChild(AbstractSyntaxTree child) {
     this.children.add(child);
   }
 
-  public void add_child(List<AbstractSyntaxTree> children) {
+  public void addChild(List<AbstractSyntaxTree> children) {
     this.children.addAll(children);
   }
 
@@ -43,18 +47,31 @@ public class AbstractSyntaxTree {
     return this.children;
   }
 
+  public AbstractSyntaxTree removeChild(int childIndex) {
+    return children.remove(childIndex);
+  }
+
+  public void removeEpsilons() {
+    for (AbstractSyntaxTree child: children) {
+      if (child.getLabel() == "Epsilon") {
+        children.remove(child);
+      } else {
+        child.removeEpsilons();
+      }
+    }
+  }
 
   public String print_tree() {
-      StringBuilder treeTeX = new StringBuilder();
-      treeTeX.append("\n{");
-      treeTeX.append(label);
+      StringBuilder tree = new StringBuilder();
+      tree.append("\n{");
+      tree.append(label);
       if (children != null) {
           for (AbstractSyntaxTree child: children) {
-              treeTeX.append(child.print_tree());
+              tree.append(child.print_tree());
           }
       }
-      treeTeX.append("}\n");
-      return treeTeX.toString();
+      tree.append("}\n");
+      return tree.toString();
   }
 
 }
