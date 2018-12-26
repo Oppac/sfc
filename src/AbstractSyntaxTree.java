@@ -47,30 +47,29 @@ public class AbstractSyntaxTree {
     return this.children;
   }
 
-  public AbstractSyntaxTree removeChild(int childIndex) {
-    return children.remove(childIndex);
-  }
 
   public void removeEpsilons() {
+    List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
     for (AbstractSyntaxTree child: children) {
       if (child.getLabel() == "Epsilon") {
-        children.remove(child);
+        toRemove.add(child);
       } else {
         child.removeEpsilons();
       }
     }
+    children.removeAll(toRemove);
   }
 
   public String print_tree() {
       StringBuilder tree = new StringBuilder();
-      tree.append("\n{");
+      tree.append("\n[");
       tree.append(label);
       if (children != null) {
           for (AbstractSyntaxTree child: children) {
               tree.append(child.print_tree());
           }
       }
-      tree.append("}\n");
+      tree.append("]\n");
       return tree.toString();
   }
 

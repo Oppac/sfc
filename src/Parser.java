@@ -109,6 +109,7 @@ public class Parser {
     compareToken(LexicalUnit.ENDPROG);
     skipEndline();
     compareToken(LexicalUnit.EOS);
+    ast.removeEpsilons();
     return ast;
   }
 
@@ -162,7 +163,7 @@ public class Parser {
         ast.addChild(code());
         return ast;
       default:
-        return ast;
+        return new AbstractSyntaxTree("Epsilon");
     }
   }
 
@@ -187,7 +188,7 @@ public class Parser {
       case READ:
         return new AbstractSyntaxTree("Read", parse_read());
       default:
-        return new AbstractSyntaxTree();
+        return new AbstractSyntaxTree("Epsilon");
     }
   }
 
@@ -205,7 +206,6 @@ public class Parser {
       AbstractSyntaxTree ast = new AbstractSyntaxTree("Expr");
       ast.addChild(hpProd());
       ast.addChild(lpExpr());
-      ast.removeEpsilons();
       return ast;
     }
 
