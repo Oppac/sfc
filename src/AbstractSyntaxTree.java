@@ -59,6 +59,21 @@ public class AbstractSyntaxTree {
     children.removeAll(toRemove);
   }
 
+  public void removeSingleExpr() {
+    List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
+    List<AbstractSyntaxTree> toAdd = new ArrayList<AbstractSyntaxTree>();
+    for (AbstractSyntaxTree child: children) {
+      if (child.getLabel() == "Expr" && child.getChildren().size() == 1) {
+        toAdd.addAll(child.getChildren());
+        toRemove.add(child);
+      } else {
+        child.removeSingleExpr();
+      }
+    }
+    children.removeAll(toRemove);
+    children.addAll(toAdd);
+  }
+
   public String print_tree() {
       StringBuilder tree = new StringBuilder();
       tree.append("\n[");

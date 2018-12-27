@@ -110,6 +110,7 @@ public class Parser {
     skipEndline();
     compareToken(LexicalUnit.EOS);
     ast.removeEpsilons();
+    ast.removeSingleExpr();
     return ast;
   }
 
@@ -267,6 +268,7 @@ public class Parser {
       case MINUS:
         AbstractSyntaxTree ast4 = new AbstractSyntaxTree();
         ast4.addLabel(compareTokenAdd(LexicalUnit.MINUS).getLabel());
+        ast4.addChild(new AbstractSyntaxTree("0"));
         ast4.addChild(simpleExpr());
         return ast4;
       default:
