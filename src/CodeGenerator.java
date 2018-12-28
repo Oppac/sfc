@@ -1,4 +1,7 @@
 import java.util.LinkedHashMap;
+import java.io.FileReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 public class CodeGenerator {
 
@@ -9,12 +12,23 @@ public class CodeGenerator {
   public CodeGenerator(AbstractSyntaxTree ast) {
     this.ast  = ast;
     this.symbolicTable = new LinkedHashMap<String, Integer>();
-    this.count = 0;
+    this.count = 1;
+  }
+
+  public void writeToFile(String llvmCode) {
+    try {
+      String fileName = ast.getLabel().toLowerCase() + ".ll";
+      BufferedWriter llvmFile = new BufferedWriter(new FileWriter(fileName));
+      llvmFile.write(llvmCode);
+      llvmFile.close();
+    } catch (Exception e) {
+      System.err.println("Failed to generate llvm file");
+    }
   }
 
   public void generateLLVM() {
     String llvmCode = "";
-    llvmCode += "define void "+ ast.getLabel() +"() {\n";
+    llvmCode += "define void @main() {\n";
     for (AbstractSyntaxTree child: ast.getChildren()) {
       if (child.getLabel() == "Variables") {
         llvmCode += createVariables(child);
@@ -25,6 +39,7 @@ public class CodeGenerator {
       }
     }
     llvmCode += "\nret void \n}";
+    writeToFile(llvmCode);
     System.out.println(llvmCode);
   }
 
@@ -53,6 +68,9 @@ public class CodeGenerator {
   public String computeExprArith(AbstractSyntaxTree exprArith) {
     String llvmCode = "";
     String value = exprArith.getLabel();
+    if (exprArith.getChildren().size() == 0) {
+      llvmCode += "%" + count + " = add i32 0, " + exprArith.getLabel() + "\n";
+    }
     String rightChild, leftChild;
     if (exprArith.getChildren().size() > 1) {
       llvmCode += computeExprArith(exprArith.getChild(0));
@@ -98,10 +116,10 @@ public class CodeGenerator {
   public String generateAssign(AbstractSyntaxTree assign) {
     String llvmCode = "";
     if (symbolicTable.containsKey(assign.getChild(0).getLabel())) {
-      String varName = computeExprArith(assign.getChild(1));
-      llvmCode += "\nstore i32 %" + assign.getChild(0).getLabel() + ", i32* %\n" + varName + "\n";
+      llvmCode += computeExprArith(assign.getChild(1));
+      llvmCode += "\nstore i32 %" + (count-1) + ", i32* %" + assign.getChild(0).getLabel() + "\n";
     } else {
-      System.out.println("Variable not declared");
+      System.err.println("Variable not declared");
     }
     return llvmCode;
   }
