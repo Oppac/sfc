@@ -81,9 +81,12 @@ public class CodeGenerator {
     return llvmCode;
   }
 
+  public String simpleCond(AbstractSyntaxTree cond) {
+    return "";
+  }
+
   public String createVariables(AbstractSyntaxTree vars) {
     String llvmCode = "";
-    llvmCode += "\n<Variables>\n";
     for (AbstractSyntaxTree child: vars.getChildren()) {
       String varName = child.getLabel();
       llvmCode += "%" + varName + " = alloca i32\n";
@@ -94,7 +97,6 @@ public class CodeGenerator {
 
   public String generateAssign(AbstractSyntaxTree assign) {
     String llvmCode = "";
-    llvmCode += "\n<Assign>\n";
     if (symbolicTable.containsKey(assign.getChild(0).getLabel())) {
       String varName = computeExprArith(assign.getChild(1));
       llvmCode += "\nstore i32 %" + assign.getChild(0).getLabel() + ", i32* %\n" + varName + "\n";
@@ -106,7 +108,6 @@ public class CodeGenerator {
 
   public String generatePrint(AbstractSyntaxTree print) {
     String llvmCode = "";
-    llvmCode += "\n<Print>\n";
     for (AbstractSyntaxTree child: print.getChildren()) {
       String varName = computeExprArith(child);
       llvmCode += "call void @println(i32* %" + varName + ")" + "\n";
@@ -116,7 +117,6 @@ public class CodeGenerator {
 
   public String generateIf(AbstractSyntaxTree ifGen) {
     String llvmCode = "";
-    llvmCode += "\n<IF>\n";
     llvmCode += generateCond(ifGen.getChild(0));
     llvmCode += "\nbr i1 %" + count + "," + "label %iftrue, label %iffalse\n";
     llvmCode += "\niftrue:\n";
@@ -128,7 +128,6 @@ public class CodeGenerator {
 
   public String generateWhile(AbstractSyntaxTree whileGen) {
   String llvmCode = "";
-  llvmCode += "\n<While>\n";
   llvmCode += generateCond(whileGen.getChild(0));
   llvmCode += "\nbr i1 %" + count + ", label %beginLoop, label %endLoop\n";
   llvmCode += "beginLoop:\n";
@@ -141,7 +140,6 @@ public class CodeGenerator {
   public String generateFor(AbstractSyntaxTree forGen) {
   String llvmCode = "";
   String varName = forGen.getChild(0).getLabel();
-  llvmCode += "\n<For>\n";
   if (symbolicTable.containsKey(varName)) {
     String value = computeExprArith(forGen.getChild(1));
     llvmCode += "\nstore i32 %" + varName + ", i32* %" + value + "\n";
@@ -160,7 +158,6 @@ public class CodeGenerator {
 
   public String generateRead(AbstractSyntaxTree read) {
     String llvmCode = "";
-    llvmCode += "\n<Read>\n";
     for (AbstractSyntaxTree child: read.getChildren()) {
       String varName = child.getLabel();
       llvmCode += "%" + count + "= call i32 @readInt()\n";
