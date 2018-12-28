@@ -9,6 +9,18 @@ public class CodeGenerator {
   private LinkedHashMap<String, Integer> symbolicTable;
   private int count;
 
+  private String printFunction = (
+  "@.strP = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n"
+  + "define void @println(i32 %x) {\n"
+  + "%1 = alloca i32, align 4\n"
+  + "store i32 %x, i32* %1, align 4\n"
+  + "%2 = load i32, i32* %1, align 4\n"
+  + "%3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.strP, i32 0, i32 0), i32 %2)\n"
+  + "ret void\n"
+  + "}\n"
+  + "declare i32 @printf(i8*, ...)\n"
+  );
+
   public CodeGenerator(AbstractSyntaxTree ast) {
     this.ast  = ast;
     this.symbolicTable = new LinkedHashMap<String, Integer>();
@@ -28,7 +40,8 @@ public class CodeGenerator {
 
   public void generateLLVM() {
     String llvmCode = "";
-    llvmCode += "define void @main() {\n";
+    llvmCode += printFunction;
+    llvmCode += "\ndefine void @main() {\n";
     for (AbstractSyntaxTree child: ast.getChildren()) {
       if (child.getLabel() == "Variables") {
         llvmCode += createVariables(child);
@@ -82,13 +95,13 @@ public class CodeGenerator {
       rightChild = exprArith.getLabel();
     }
     if (value.equals("+")) {
-      llvmCode += "% " + count + " = add i32 %" + leftChild + ", %" + rightChild + "\n";
+      llvmCode += "%" + count + " = add i32 %" + leftChild + ", %" + rightChild + "\n";
     } else if (value.equals("-") || value.equals("-e") ) {
-      llvmCode += "% " + count + " = sub i32 %" + leftChild + ", %" + rightChild + "\n";
+      llvmCode += "%" + count + " = sub i32 %" + leftChild + ", %" + rightChild + "\n";
     } else if (value.equals("*")) {
-      llvmCode += "% " + count + " = mul i32 %" + leftChild + ", %" + rightChild + "\n";
+      llvmCode += "%" + count + " = mul i32 %" + leftChild + ", %" + rightChild + "\n";
     } else if (value.equals("/")) {
-      llvmCode += "% " + count + " = sdiv i32 %" + leftChild + ", %" + rightChild + "\n";
+      llvmCode += "%" + count + " = sdiv i32 %" + leftChild + ", %" + rightChild + "\n";
     }
     count++;
     return llvmCode;
@@ -127,8 +140,11 @@ public class CodeGenerator {
   public String generatePrint(AbstractSyntaxTree print) {
     String llvmCode = "";
     for (AbstractSyntaxTree child: print.getChildren()) {
-      String varName = computeExprArith(child);
-      llvmCode += "call void @println(i32* %" + varName + ")" + "\n";
+      //llvmCode += computeExprArith(child);
+      String varName = child.getLabel();
+      llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
+      llvmCode += "call void @println(i32 %" + count + ")" + "\n";
+      count++;
     }
     return llvmCode;
   }
