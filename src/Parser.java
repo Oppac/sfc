@@ -349,53 +349,53 @@ public class Parser {
   //[34] <PCond> -> <SimpleCond> <HpCond>
   private List<AbstractSyntaxTree> pCond() throws IOException {
     List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
-    arr.addAll(simpleCond());
-    arr.addAll(hpCond());
+    arr.add(simpleCond());
+    arr.add(hpCond());
     return arr;
   }
 
   //[35] <HpCond> -> AND <SimpleCond> <HpCond>
   //[36] <HpCond> -> EPSILON
-  private List<AbstractSyntaxTree> hpCond() throws IOException {
+  private AbstractSyntaxTree hpCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.AND)) {
-      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
-      arr.add(compareTokenAdd(LexicalUnit.AND));
-      arr.addAll(simpleCond());
-      arr.addAll(hpCond());
-      return arr;
+      AbstractSyntaxTree ast = new AbstractSyntaxTree();
+      ast.addLabel(compareTokenAdd(LexicalUnit.AND).getLabel());
+      ast.addChild(simpleCond());
+      ast.addChild(hpCond());
+      return ast;
     } else {
-      return new ArrayList<AbstractSyntaxTree>();
+      return new AbstractSyntaxTree("Epsilon");
     }
   }
 
   //[37] <LpCond> -> OR <PCond> <LpCond>
   //[38] <LpCond> -> EPSILON
-  private List<AbstractSyntaxTree> lpCond() throws IOException {
+  private AbstractSyntaxTree lpCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.OR)) {
-      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
-      arr.add(compareTokenAdd(LexicalUnit.OR));
-      arr.addAll(pCond());
-      arr.addAll(pCond());
-      return arr;
+      AbstractSyntaxTree ast = new AbstractSyntaxTree();
+      ast.addLabel(compareTokenAdd(LexicalUnit.OR).getLabel());
+      ast.addChild(pCond());
+      ast.addChild(lpCond());
+      return ast;
     } else {
-      return new ArrayList<AbstractSyntaxTree>();
+      return new AbstractSyntaxTree("Epsilon");
     }
   }
 
   //[39] <SimpleCond> -> NOT <SimpleCond>
   //[40] <SimpleCond> -> <ExprArith> <Comp> <ExprArith>
-  private List<AbstractSyntaxTree> simpleCond() throws IOException {
+  private AbstractSyntaxTree simpleCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.NOT)) {
-      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
-      compareTokenAdd(LexicalUnit.NOT);
-      arr.addAll(simpleCond());
-      return arr;
+      AbstractSyntaxTree ast = new AbstractSyntaxTree();
+      ast.addLabel(compareTokenAdd(LexicalUnit.NOT).getLabel());
+      ast.addChild(simpleCond());
+      return ast;
     } else {
-      List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
-      arr.add(exprArith());
-      arr.add(comp());
-      arr.add(exprArith());
-      return arr;
+      AbstractSyntaxTree ast = new AbstractSyntaxTree();
+      ast.addChild(exprArith());
+      ast.addLabel(comp());
+      ast.addChild(exprArith());
+      return ast;
     }
   }
 
@@ -405,20 +405,20 @@ public class Parser {
   //[44] <Comp> -> LEQ
   //[45] <Comp> -> LT
   //[46] <Comp> -> NEQ
-  private AbstractSyntaxTree comp() throws IOException {
+  private String comp() throws IOException {
     switch(lookahead.getType()) {
       case EQ:
-        return compareTokenAdd(LexicalUnit.EQ);
+        return compareTokenAdd(LexicalUnit.EQ).getLabel();
       case GEQ:
-        return compareTokenAdd(LexicalUnit.GEQ);
+        return compareTokenAdd(LexicalUnit.GEQ).getLabel();
       case GT:
-        return compareTokenAdd(LexicalUnit.GT);
+        return compareTokenAdd(LexicalUnit.GT).getLabel();
       case LEQ:
-        return compareTokenAdd(LexicalUnit.LEQ);
+        return compareTokenAdd(LexicalUnit.LEQ).getLabel();
       case LT:
-        return compareTokenAdd(LexicalUnit.LT);
+        return compareTokenAdd(LexicalUnit.LT).getLabel();
       case NEQ:
-        return compareTokenAdd(LexicalUnit.NEQ);
+        return compareTokenAdd(LexicalUnit.NEQ).getLabel();
       default:
         throw new Error("\nError at line " + lookahead.getLine() + ": " +
         lookahead.getType() + " expected a comparison operator");
