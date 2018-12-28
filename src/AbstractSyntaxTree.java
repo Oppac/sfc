@@ -63,7 +63,13 @@ public class AbstractSyntaxTree {
     List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
     List<AbstractSyntaxTree> toAdd = new ArrayList<AbstractSyntaxTree>();
     for (AbstractSyntaxTree child: children) {
-      if (child.getLabel() == "Expr" && child.getChildren().size() == 1) {
+      if (child.getLabel().equals("Expr") && child.getChildren().size() == 1) {
+        toAdd.addAll(child.getChildren());
+        toRemove.add(child);
+      } else if (label.equals(child.getLabel()) && child.getChildren().size() == 0) {
+        toAdd.addAll(child.getChildren());
+        toRemove.add(child);
+      } else if (label.equals("-e") && child.getLabel().equals("-e")) {
         toAdd.addAll(child.getChildren());
         toRemove.add(child);
       } else {
@@ -72,6 +78,20 @@ public class AbstractSyntaxTree {
     }
     children.removeAll(toRemove);
     children.addAll(toAdd);
+  }
+
+  public void simplifyExpr() {
+    List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
+    for (AbstractSyntaxTree child: children) {
+      if (child.getLabel().equals("+") || child.getLabel().equals("*") ||
+          child.getLabel().equals("/") || child.getLabel().equals("-")) {
+        label = child.getLabel();
+        child.addLabel(child.getChild(0).getLabel());
+        toRemove.add(child.getChild(0));
+      }
+      child.simplifyExpr();
+    }
+    children.removeAll(toRemove);
   }
 
   public String print_tree() {

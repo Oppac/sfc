@@ -20,7 +20,7 @@ public class Parser {
   * @param t tell if the option for drawing the tree is active or not
   */
 
-  public Parser(BufferedReader filePath, boolean v, boolean t) throws IOException {
+  public Parser(BufferedReader filePath) throws IOException {
     this.scanner = new Lexer(filePath);
     this.lookahead = scanner.yylex();
   }
@@ -39,13 +39,12 @@ public class Parser {
   * the proper label if draw tree is active).
   * @throws IOException give an error if the tokens do not match.
   */
-  private AbstractSyntaxTree compareToken(LexicalUnit token) throws IOException {
+  private void compareToken(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
       throw new Error("\nError at line " + lookahead.getLine() + ": " +
       lookahead.getType() + " expected " + token);
     }
     nextToken();
-    return new AbstractSyntaxTree();
   }
 
   private AbstractSyntaxTree compareTokenAdd(LexicalUnit token) throws IOException {
@@ -96,10 +95,10 @@ public class Parser {
   */
   //[01] <Program> -> BEGINPROG [ProgName] [EndLine] <Variables> <Code> ENDPROG
   private AbstractSyntaxTree program() throws IOException {
-    AbstractSyntaxTree ast = new AbstractSyntaxTree("Program");
+    AbstractSyntaxTree ast = new AbstractSyntaxTree();
     skipEndline();
     compareToken(LexicalUnit.BEGINPROG);
-    compareToken(LexicalUnit.PROGNAME);
+    ast.addLabel(compareTokenAdd(LexicalUnit.PROGNAME).getLabel());
     compareToken(LexicalUnit.ENDLINE);
     skipEndline();
     ast.addChild(variables());
@@ -111,6 +110,8 @@ public class Parser {
     compareToken(LexicalUnit.EOS);
     ast.removeEpsilons();
     ast.removeSingleExpr();
+    ast.simplifyExpr();
+    ast.removeSingleExpr();
     return ast;
   }
 
@@ -119,8 +120,7 @@ public class Parser {
   private AbstractSyntaxTree variables() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.VARIABLES)) {
       compareToken(LexicalUnit.VARIABLES);
-      List<AbstractSyntaxTree> var = varlist();
-      return new AbstractSyntaxTree("Variables", var);
+      return new AbstractSyntaxTree("Variables", varlist());
     } else {
       return new AbstractSyntaxTree("Epsilon");
     }
@@ -267,7 +267,7 @@ public class Parser {
         return ast3;
       case MINUS:
         AbstractSyntaxTree ast4 = new AbstractSyntaxTree();
-        ast4.addLabel(compareTokenAdd(LexicalUnit.MINUS).getLabel());
+        ast4.addLabel(compareTokenAdd(LexicalUnit.MINUS).getLabel() + "e");
         ast4.addChild(new AbstractSyntaxTree("0"));
         ast4.addChild(simpleExpr());
         return ast4;

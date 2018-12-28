@@ -50,24 +50,27 @@ public class CodeGenerator {
     return llvmCode;
   }
 
-  //To do the i
   public String computeExprArith(AbstractSyntaxTree exprArith) {
     String llvmCode = "";
     String value = exprArith.getLabel();
-    int rightChild, leftChild;
-    for (AbstractSyntaxTree child: exprArith.getChildren()) {
-      computeExprArith(child);
+    String rightChild, leftChild;
+    if (exprArith.getChildren().size() > 1) {
+      llvmCode += computeExprArith(exprArith.getChild(0));
+      leftChild = String.valueOf(count - 1);
+      llvmCode += computeExprArith(exprArith.getChild(1));
+      rightChild = String.valueOf(count - 1);
+    } else {
+      leftChild = exprArith.getLabel();
+      rightChild = exprArith.getLabel();
     }
-    leftChild = count - 1;
-    rightChild = count - 1;
-    if (value == "+") {
-      llvmCode += "% " + count + " = add i32 %" + leftChild + ", %" + rightChild;
-    } else if (value == "-") {
-      llvmCode += "% " + count + " = sub i32 %" + leftChild + ", %" + rightChild;
-    } else if (value == "*") {
-      llvmCode += "% " + count + " = mul i32 %" + leftChild + ", %" + rightChild;
-    } else if (value == "/") {
-      llvmCode += "% " + count + " = sdiv i32 %" + leftChild + ", %" + rightChild;
+    if (value.equals("+")) {
+      llvmCode += "% " + count + " = add i32 %" + leftChild + ", %" + rightChild + "\n";
+    } else if (value.equals("-") || value.equals("-e") ) {
+      llvmCode += "% " + count + " = sub i32 %" + leftChild + ", %" + rightChild + "\n";
+    } else if (value.equals("*")) {
+      llvmCode += "% " + count + " = mul i32 %" + leftChild + ", %" + rightChild + "\n";
+    } else if (value.equals("/")) {
+      llvmCode += "% " + count + " = sdiv i32 %" + leftChild + ", %" + rightChild + "\n";
     }
     count++;
     return llvmCode;
@@ -94,7 +97,7 @@ public class CodeGenerator {
     llvmCode += "\n<Assign>\n";
     if (symbolicTable.containsKey(assign.getChild(0).getLabel())) {
       String varName = computeExprArith(assign.getChild(1));
-      llvmCode += "store i32 %" + assign.getChild(0).getLabel() + ", i32* %" + varName + "\n";
+      llvmCode += "\nstore i32 %" + assign.getChild(0).getLabel() + ", i32* %\n" + varName + "\n";
     } else {
       System.out.println("Variable not declared");
     }
