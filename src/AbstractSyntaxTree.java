@@ -80,6 +80,34 @@ public class AbstractSyntaxTree {
     children.addAll(toAdd);
   }
 
+  public void removeNot() {
+    List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
+    List<AbstractSyntaxTree> toAdd = new ArrayList<AbstractSyntaxTree>();
+    for (AbstractSyntaxTree child: children) {
+      if (child.getLabel().equals("NOT") && child.getChildren().size() == 1) {
+        toAdd.addAll(child.getChildren());
+        if (child.getChild(0).getLabel().equals("=")) {
+          child.getChild(0).addLabel("<>");
+        } else if (child.getChild(0).getLabel().equals(">=")) {
+          child.getChild(0).addLabel("<");
+        } else if (child.getChild(0).getLabel().equals(">")) {
+          child.getChild(0).addLabel("<=");
+        } else if (child.getChild(0).getLabel().equals("<=")) {
+          child.getChild(0).addLabel(">");
+        } else if (child.getChild(0).getLabel().equals("<")) {
+          child.getChild(0).addLabel(">=");
+        } else if (child.getChild(0).getLabel().equals("<>")) {
+          child.getChild(0).addLabel("=");
+        }
+        toRemove.add(child);
+      } else {
+        child.removeNot();
+      }
+    }
+    children.removeAll(toRemove);
+    children.addAll(toAdd);
+  }
+
   public void simplifyExpr() {
     List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
     for (AbstractSyntaxTree child: children) {
