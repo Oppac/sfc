@@ -21,6 +21,8 @@ public class CodeGenerator {
   + "declare i32 @printf(i8*, ...)\n"
   );
 
+  private String readFunction = ("");
+
   public CodeGenerator(AbstractSyntaxTree ast) {
     this.ast  = ast;
     this.symbolicTable = new LinkedHashMap<String, Integer>();
@@ -81,27 +83,29 @@ public class CodeGenerator {
   public String computeExprArith(AbstractSyntaxTree exprArith) {
     String llvmCode = "";
     String value = exprArith.getLabel();
+    int leftExpr, rightExpr;
     if (exprArith.getChildren().size() == 0) {
-      llvmCode += "%" + count + " = add i32 0, " + exprArith.getLabel() + "\n";
-    }
-    String rightChild, leftChild;
-    if (exprArith.getChildren().size() > 1) {
-      llvmCode += computeExprArith(exprArith.getChild(0));
-      leftChild = String.valueOf(count - 1);
-      llvmCode += computeExprArith(exprArith.getChild(1));
-      rightChild = String.valueOf(count - 1);
+      if (symbolicTable.containsKey(exprArith.getLabel())) {
+        llvmCode += "%" + count + " = load i32, i32* %" + exprArith.getLabel() + "\n";
+        count++;
+        llvmCode += "%" + count + " = add i32 0, %" + (count-1) + "\n";
+      } else {
+        llvmCode += "%" + count + " = add i32 0, " + exprArith.getLabel() + "\n";
+      }
     } else {
-      leftChild = exprArith.getLabel();
-      rightChild = exprArith.getLabel();
-    }
-    if (value.equals("+")) {
-      llvmCode += "%" + count + " = add i32 %" + leftChild + ", %" + rightChild + "\n";
-    } else if (value.equals("-") || value.equals("-e") ) {
-      llvmCode += "%" + count + " = sub i32 %" + leftChild + ", %" + rightChild + "\n";
-    } else if (value.equals("*")) {
-      llvmCode += "%" + count + " = mul i32 %" + leftChild + ", %" + rightChild + "\n";
-    } else if (value.equals("/")) {
-      llvmCode += "%" + count + " = sdiv i32 %" + leftChild + ", %" + rightChild + "\n";
+      llvmCode += computeExprArith(exprArith.getChild(0));
+      leftExpr = count-1;
+      llvmCode += computeExprArith(exprArith.getChild(1));
+      rightExpr = count-1;
+      if (value.equals("+")) {
+        llvmCode += "%" + count + " = add i32 %" + leftExpr + ", %" + rightExpr + "\n";
+      } else if (value.equals("-") || value.equals("-e")) {
+        llvmCode += "%" + count + " = sub i32 %" + leftExpr + ", %" + rightExpr + "\n";
+      } else if (value.equals("*")) {
+        llvmCode += "%" + count + " = mul i32 %" + leftExpr + ", %" + rightExpr + "\n";
+      } else if (value.equals("/")) {
+        llvmCode += "%" + count + " = sdiv i32 %" + leftExpr + ", %" + rightExpr + "\n";
+      }
     }
     count++;
     return llvmCode;
@@ -130,7 +134,7 @@ public class CodeGenerator {
     String llvmCode = "";
     if (symbolicTable.containsKey(assign.getChild(0).getLabel())) {
       llvmCode += computeExprArith(assign.getChild(1));
-      llvmCode += "\nstore i32 %" + (count-1) + ", i32* %" + assign.getChild(0).getLabel() + "\n";
+      llvmCode += "store i32 %" + (count-1) + ", i32* %" + assign.getChild(0).getLabel() + "\n";
     } else {
       System.err.println("Variable not declared");
     }
