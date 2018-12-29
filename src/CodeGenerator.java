@@ -137,18 +137,6 @@ public class CodeGenerator {
     return llvmCode;
   }
 
-  public String generatePrint(AbstractSyntaxTree print) {
-    String llvmCode = "";
-    for (AbstractSyntaxTree child: print.getChildren()) {
-      //llvmCode += computeExprArith(child);
-      String varName = child.getLabel();
-      llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
-      llvmCode += "call void @println(i32 %" + count + ")" + "\n";
-      count++;
-    }
-    return llvmCode;
-  }
-
   public String generateIf(AbstractSyntaxTree ifGen) {
     String llvmCode = "";
     llvmCode += generateCond(ifGen.getChild(0));
@@ -188,6 +176,22 @@ public class CodeGenerator {
   llvmCode += "\n%" + count + " = add i32 %" + varName + ", %1" + "\n";
   llvmCode += "endLoop\n";
   return llvmCode;
+  }
+
+  public String generatePrint(AbstractSyntaxTree print) {
+    String llvmCode = "";
+    for (AbstractSyntaxTree child: print.getChildren()) {
+      String varName = child.getLabel();
+      if (symbolicTable.containsKey(varName)) {
+        llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
+        llvmCode += "call void @println(i32 %" + count + ")" + "\n";
+        count++;
+      } else {
+        llvmCode += computeExprArith(child);
+        llvmCode += "call void @println(i32 %" + (count-1) + ")" + "\n";
+      }
+    }
+    return llvmCode;
   }
 
   public String generateRead(AbstractSyntaxTree read) {
