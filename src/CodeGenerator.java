@@ -147,6 +147,25 @@ public class CodeGenerator {
       llvmCode += "%" + count + " = icmp ne i32 %" + leftCond + ", %" + rightCond + "\n";
     }
     count++;
+    if (cond.getChildren().size() > 1) {
+      if (cond.getChild(1).getLabel().equals("AND")) {
+        leftCond = count-1;
+        llvmCode += generateCond(cond.getChild(1));
+        rightCond = count-1;
+        llvmCode += "%" + count + " = add i1 %" + leftCond + ", %" + rightCond + "\n";
+        count++;
+        llvmCode += "%" + count + " = icmp eq i1 %" + (count-1) + ", 2" + "\n";
+        count++;
+      } else if (cond.getChild(1).getLabel().equals("OR")) {
+        leftCond = count-1;
+        llvmCode += generateCond(cond.getChild(1));
+        rightCond = count-1;
+        llvmCode += "%" + count + " = add i1 %" + leftCond + ", %" + rightCond + "\n";
+        count++;
+        llvmCode += "%" + count + " = icmp uge i1 %" + (count-1) + ", 1" + "\n";
+        count++;
+      }
+    }
     return llvmCode;
   }
 
@@ -166,7 +185,7 @@ public class CodeGenerator {
       llvmCode += computeExprArith(assign.getChild(1));
       llvmCode += "store i32 %" + (count-1) + ", i32* %" + assign.getChild(0).getLabel() + "\n";
     } else {
-      System.err.println("Variable not declared");
+      throw new Error("Variable " + assign.getChild(0).getLabel() + " is not declared");
     }
     return llvmCode;
   }
@@ -210,7 +229,7 @@ public class CodeGenerator {
       llvmCode += computeExprArith(forGen.getChild(2));
       llvmCode += "store i32 %" + (count-1) + ", i32* %" + varName + "\n";
     } else {
-      System.out.println("Variable not declared");
+      throw new Error("Variable " + varName + " is not declared");
     }
     llvmCode += computeExprArith(forGen.getChild(3));
     llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
@@ -268,7 +287,7 @@ public class CodeGenerator {
       if (symbolicTable.containsKey(varName)) {
         llvmCode += "store i32 %" + count + ", i32* %" + varName + "\n";
       } else {
-        System.err.println("Variable is not declared");
+        throw new Error("Variable " + varName + " is not declared");
       }
       count++;
     }
