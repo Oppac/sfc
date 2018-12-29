@@ -203,18 +203,40 @@ public class CodeGenerator {
     String llvmCode = "";
     String varName = forGen.getChild(0).getLabel();
     if (symbolicTable.containsKey(varName)) {
-      String value = computeExprArith(forGen.getChild(1));
-      llvmCode += "\nstore i32 %" + varName + ", i32* %" + value + "\n";
+      llvmCode += computeExprArith(forGen.getChild(2));
+      llvmCode += "store i32 %" + (count-1) + ", i32* %" + varName + "\n";
     } else {
       System.out.println("Variable not declared");
     }
-    llvmCode += computeExprArith(forGen.getChild(2));
-    llvmCode += "\n%" + count + " = load i32, i32* %" + varName + "\n";
+    llvmCode += computeExprArith(forGen.getChild(3));
+    llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
+    count++;
+    if (symbolicTable.containsKey(forGen.getChild(3).getLabel())) {
+      llvmCode += "%" + count + " = load i32, i32* %" + forGen.getChild(3).getLabel() + "\n";
+      count++;
+      llvmCode += "%" + count + " = icmp slt i32 %" + (count-2) + ", %" + (count-1) + "\n";
+    } else {
+      llvmCode += "%" + count + " = icmp slt i32 %" + (count-1) + ", " + forGen.getChild(3).getLabel() + "\n";
+    }
     llvmCode += "br i1 %" + count + ", label %startLoop, label %endLoop\n";
+    count++;
     llvmCode += "startLoop:\n";
-    llvmCode += generateCode(forGen.getChild(3));
-    llvmCode += "\n%" + count + " = add i32 %" + varName + ", %1" + "\n";
-    llvmCode += "endLoop\n";
+    llvmCode += generateCode(forGen.getChild(1));
+    llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
+    count++;
+    llvmCode += "%" + count + " = add i32 1, %" + (count-1) + "\n";
+    count++;
+    llvmCode += "store i32 %" + (count-1) + ", i32* %" + varName + "\n";
+    if (symbolicTable.containsKey(forGen.getChild(3).getLabel())) {
+      llvmCode += "%" + count + " = load i32, i32* %" + forGen.getChild(3).getLabel() + "\n";
+      count++;
+      llvmCode += "%" + count + " = icmp slt i32 %" + (count-2) + ", %" + (count-1) + "\n";
+    } else {
+      llvmCode += "%" + count + " = icmp slt i32 %" + (count-1) + ", " + forGen.getChild(3).getLabel() + "\n";
+    }
+    llvmCode += "br i1 %" + count + ", label %startLoop, label %endLoop\n";
+    count++;
+    llvmCode += "endLoop:\n";
     return llvmCode;
   }
 
