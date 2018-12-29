@@ -21,7 +21,16 @@ public class CodeGenerator {
   + "declare i32 @printf(i8*, ...)\n"
   );
 
-  private String readFunction = ("");
+  private String readFunction = (
+  "@.strR = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1\n"
+  + "define i32 @readInt() {\n"
+  + "%x = alloca i32, align 4\n"
+  + "%1 = call i32 (i8*, ...) @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.strR, i32 0, i32 0), i32* %x)\n"
+  + "%2 = load i32, i32* %x, align 4\n"
+  + "ret i32 %2\n"
+  + "}\n"
+  + "declare i32 @__isoc99_scanf(i8*, ...)\n"
+  );
 
   public CodeGenerator(AbstractSyntaxTree ast) {
     this.ast  = ast;
@@ -43,6 +52,7 @@ public class CodeGenerator {
   public void generateLLVM() {
     String llvmCode = "";
     llvmCode += printFunction;
+    llvmCode += readFunction;
     llvmCode += "\ndefine void @main() {\n";
     for (AbstractSyntaxTree child: ast.getChildren()) {
       if (child.getLabel() == "Variables") {
@@ -53,7 +63,7 @@ public class CodeGenerator {
         }
       }
     }
-    llvmCode += "\nret void \n}";
+    llvmCode += "ret void \n}\n";
     writeToFile(llvmCode);
     System.out.println(llvmCode);
   }
@@ -160,42 +170,49 @@ public class CodeGenerator {
   public String generateIf(AbstractSyntaxTree ifGen) {
     String llvmCode = "";
     llvmCode += generateCond(ifGen.getChild(0));
-    llvmCode += "br i1 %" + count + "," + "label %iftrue, label %iffalse\n";
-    llvmCode += "iftrue:\n";
-    llvmCode += generateCode(ifGen.getChild(1).getChild(0));
-    llvmCode += "iffalse:\n";
-    llvmCode += generateCode(ifGen.getChild(2).getChild(0));
+    llvmCode += "br i1 %" + (count-1) + "," + "label %ifTrue, label %ifFalse\n";
+    llvmCode += "ifTrue:\n";
+    for (AbstractSyntaxTree child: ifGen.getChild(1).getChildren()) {
+      llvmCode += generateCode(child);
+    }
+    llvmCode += "br label %ifNoElse\n";
+    llvmCode += "ifFalse:\n";
+    for (AbstractSyntaxTree child: ifGen.getChild(2).getChildren()) {
+      llvmCode += generateCode(child);
+    }
+    llvmCode += "br label %ifNoElse\n";
+    llvmCode += "ifNoElse:\n";
     return llvmCode;
   }
 
   public String generateWhile(AbstractSyntaxTree whileGen) {
-  String llvmCode = "";
-  llvmCode += generateCond(whileGen.getChild(0));
-  llvmCode += "\nbr i1 %" + count + ", label %beginLoop, label %endLoop\n";
-  llvmCode += "beginLoop:\n";
-  llvmCode += generateCode(whileGen.getChild(1));
-  llvmCode += generateCond(whileGen.getChild(0));
-  llvmCode += "endLoop\n";
-  return llvmCode;
+    String llvmCode = "";
+    llvmCode += generateCond(whileGen.getChild(0));
+    llvmCode += "\nbr i1 %" + (count-1) + ", label %beginLoop, label %endLoop\n";
+    llvmCode += "beginLoop:\n";
+    llvmCode += generateCode(whileGen.getChild(1));
+    llvmCode += generateCond(whileGen.getChild(0));
+    llvmCode += "endLoop\n";
+    return llvmCode;
   }
 
   public String generateFor(AbstractSyntaxTree forGen) {
-  String llvmCode = "";
-  String varName = forGen.getChild(0).getLabel();
-  if (symbolicTable.containsKey(varName)) {
-    String value = computeExprArith(forGen.getChild(1));
-    llvmCode += "\nstore i32 %" + varName + ", i32* %" + value + "\n";
-  } else {
-    System.out.println("Variable not declared");
-  }
-  llvmCode += computeExprArith(forGen.getChild(2));
-  llvmCode += "\n%" + count + " = load i32, i32* %" + varName + "\n";
-  llvmCode += "br i1 %" + count + ", label %beginLoop, label %endLoop\n";
-  llvmCode += "beginLoop:\n";
-  llvmCode += generateCode(forGen.getChild(3));
-  llvmCode += "\n%" + count + " = add i32 %" + varName + ", %1" + "\n";
-  llvmCode += "endLoop\n";
-  return llvmCode;
+    String llvmCode = "";
+    String varName = forGen.getChild(0).getLabel();
+    if (symbolicTable.containsKey(varName)) {
+      String value = computeExprArith(forGen.getChild(1));
+      llvmCode += "\nstore i32 %" + varName + ", i32* %" + value + "\n";
+    } else {
+      System.out.println("Variable not declared");
+    }
+    llvmCode += computeExprArith(forGen.getChild(2));
+    llvmCode += "\n%" + count + " = load i32, i32* %" + varName + "\n";
+    llvmCode += "br i1 %" + count + ", label %beginLoop, label %endLoop\n";
+    llvmCode += "beginLoop:\n";
+    llvmCode += generateCode(forGen.getChild(3));
+    llvmCode += "\n%" + count + " = add i32 %" + varName + ", %1" + "\n";
+    llvmCode += "endLoop\n";
+    return llvmCode;
   }
 
   public String generatePrint(AbstractSyntaxTree print) {
@@ -219,7 +236,11 @@ public class CodeGenerator {
     for (AbstractSyntaxTree child: read.getChildren()) {
       String varName = child.getLabel();
       llvmCode += "%" + count + "= call i32 @readInt()\n";
-      llvmCode += "store i32 %" + count + ", i32* %" + varName + "\n";
+      if (symbolicTable.containsKey(varName)) {
+        llvmCode += "store i32 %" + count + ", i32* %" + varName + "\n";
+      } else {
+        System.err.println("Variable is not declared");
+      }
       count++;
     }
     return llvmCode;
