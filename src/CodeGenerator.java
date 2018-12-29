@@ -188,11 +188,14 @@ public class CodeGenerator {
   public String generateWhile(AbstractSyntaxTree whileGen) {
     String llvmCode = "";
     llvmCode += generateCond(whileGen.getChild(0));
-    llvmCode += "\nbr i1 %" + (count-1) + ", label %beginLoop, label %endLoop\n";
-    llvmCode += "beginLoop:\n";
-    llvmCode += generateCode(whileGen.getChild(1));
+    llvmCode += "br i1 %" + (count-1) + ", label %startLoop, label %endLoop\n";
+    llvmCode += "startLoop:\n";
+    for (AbstractSyntaxTree child: whileGen.getChild(1).getChildren()) {
+        llvmCode += generateCode(child);
+    }
     llvmCode += generateCond(whileGen.getChild(0));
-    llvmCode += "endLoop\n";
+    llvmCode += "br i1 %" + (count-1) + ", label %startLoop, label %endLoop\n";
+    llvmCode += "endLoop:\n";
     return llvmCode;
   }
 
@@ -207,8 +210,8 @@ public class CodeGenerator {
     }
     llvmCode += computeExprArith(forGen.getChild(2));
     llvmCode += "\n%" + count + " = load i32, i32* %" + varName + "\n";
-    llvmCode += "br i1 %" + count + ", label %beginLoop, label %endLoop\n";
-    llvmCode += "beginLoop:\n";
+    llvmCode += "br i1 %" + count + ", label %startLoop, label %endLoop\n";
+    llvmCode += "startLoop:\n";
     llvmCode += generateCode(forGen.getChild(3));
     llvmCode += "\n%" + count + " = add i32 %" + varName + ", %1" + "\n";
     llvmCode += "endLoop\n";
