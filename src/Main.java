@@ -28,7 +28,7 @@ public class Main {
       toFile = true;
       if (args.length > 2 && !(args[2].equals("-exec"))) {
         output += args[2];
-        if (args.length > 3 && !(args[3].equals("-exec"))) {
+        if (args.length > 3 && (args[3].equals("-exec"))) {
           toExec = true;
         }
       } else if (args.length > 2 && args[2].equals("-exec")) {
@@ -47,13 +47,21 @@ public class Main {
       CodeGenerator generator = new CodeGenerator(ast);
       String llvmCode = generator.generateLLVM();
       System.out.println(llvmCode);
+
       if (toFile) {
         generator.writeToFile(llvmCode, output);
       }
-      if (toExec) {
-        if (output.isEmpty()) {
-          String llFileName = ast.getLabel().toLowerCase() + ".ll";
-          String bcFileName = ast.getLabel().toLowerCase() + ".bc";
+
+      try {
+        if (toExec) {
+          String llFileName, bcFileName;
+          if (output.isEmpty()) {
+            llFileName = ast.getLabel().toLowerCase() + ".ll";
+            bcFileName = ast.getLabel().toLowerCase() + ".bc";
+          } else {
+            llFileName = output;
+            bcFileName = output.replace(".ll", ".bc");
+          }
           ProcessBuilder pb = new ProcessBuilder("llvm-as", llFileName, "-o", bcFileName);
           pb.inheritIO();
           pb.start().waitFor();
@@ -61,6 +69,8 @@ public class Main {
           pb2.inheritIO();
           pb2.start().waitFor();
         }
+      } catch (Exception e) {
+        System.err.println("Failed to execute the llvm file");
       }
     } catch (Exception e) {
       e.printStackTrace();
