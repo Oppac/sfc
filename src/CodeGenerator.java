@@ -113,11 +113,27 @@ public class CodeGenerator {
 
   public String generateCond(AbstractSyntaxTree cond) {
     String llvmCode = "";
+    int leftCond, rightCond;
+    String simpleCond = cond.getChild(0).getLabel();
+    llvmCode += computeExprArith(cond.getChild(0).getChild(0));
+    leftCond = count-1;
+    llvmCode += computeExprArith(cond.getChild(0).getChild(1));
+    rightCond = count-1;
+    if (simpleCond.equals("=")) {
+      llvmCode += "%" + count + " = icmp eq i32 %" + leftCond + ", %" + rightCond + "\n";
+    } else if (simpleCond.equals(">=")) {
+      llvmCode += "%" + count + " = icmp sge i32 %" + leftCond + ", %" + rightCond + "\n";
+    } else if (simpleCond.equals(">")) {
+      llvmCode += "%" + count + " = icmp sgt i32 %" + leftCond + ", %" + rightCond + "\n";
+    } else if (simpleCond.equals("<=")) {
+      llvmCode += "%" + count + " = icmp sle i32 %" + leftCond + ", %" + rightCond + "\n";
+    } else if (simpleCond.equals("<")) {
+      llvmCode += "%" + count + " = icmp slt i32 %" + leftCond + ", %" + rightCond + "\n";
+    } else if (simpleCond.equals("<>")) {
+      llvmCode += "%" + count + " = icmp ne i32 %" + leftCond + ", %" + rightCond + "\n";
+    }
+    count++;
     return llvmCode;
-  }
-
-  public String simpleCond(AbstractSyntaxTree cond) {
-    return "";
   }
 
   public String createVariables(AbstractSyntaxTree vars) {
@@ -144,10 +160,10 @@ public class CodeGenerator {
   public String generateIf(AbstractSyntaxTree ifGen) {
     String llvmCode = "";
     llvmCode += generateCond(ifGen.getChild(0));
-    llvmCode += "\nbr i1 %" + count + "," + "label %iftrue, label %iffalse\n";
-    llvmCode += "\niftrue:\n";
+    llvmCode += "br i1 %" + count + "," + "label %iftrue, label %iffalse\n";
+    llvmCode += "iftrue:\n";
     llvmCode += generateCode(ifGen.getChild(1).getChild(0));
-    llvmCode += "\niffalse:\n";
+    llvmCode += "iffalse:\n";
     llvmCode += generateCode(ifGen.getChild(2).getChild(0));
     return llvmCode;
   }
