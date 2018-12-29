@@ -15,58 +15,52 @@ public class Main {
   * @param args the arguments given to the parser
   */
   public static void main(String[] args) {
-    boolean verbose = false;
-    boolean tree = true;
-    String output = "None";
+    boolean toFile = false;
+    boolean toExec = false;
+    String output = "";
 
     if (args.length < 1 || args.length > 4) {
-      System.out.println("Usage: java -jar Part2.jar (-v) (-wt output.tex) input.sf");
+      System.out.println("Usage: java -jar Part3.jar input.sf --option [-o [output.ll]] [-exec]");
     }
 
     //Verbose option
-    if (args.length > 1 && args[0].equals("-v")) {
-      verbose = true;
-    }
-
-    //Write tree option
-    if (args.length > 1 && args[0].equals("-wt")) {
-      try {
-        tree = true;
-        output = args[1];
-      } catch (Exception e) {
-        System.out.println("Please specify a lex file to draw the tree");
-      }
-    //Write tree and verbose
-    } else if (args.length > 1 && args[1].equals("-wt")) {
-      if (args[0].equals("-v")) {
-        verbose = true;
-      } else {
-        System.out.println("Usage: java -jar Part2.jar (-v) (-wt output.tex) input.sf");
-      }
-      try {
-        tree = true;
-        output = args[2];
-      } catch (Exception e) {
-        System.out.println("Please specify a lex file to draw the tree");
+    if (args.length > 1 && args[1].equals("-o")) {
+      toFile = true;
+      if (args.length > 2 && !(args[2].equals("-exec"))) {
+        output += args[2];
+        if (args.length > 3 && !(args[3].equals("-exec"))) {
+          toExec = true;
+        }
+      } else if (args.length > 2 && args[2].equals("-exec")) {
+        toExec = true;
       }
     }
-  startCompilation(args[(args.length)-1], verbose, tree, output);
+    startCompilation(args[0], toFile, toExec, output);
   }
 
-  private static void startCompilation(String filePath, boolean verbose, boolean tree, String output) {
+  private static void startCompilation(String filePath, boolean toFile, boolean toExec, String output) {
     try {
-      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)), verbose, tree);
-      //If write tree is active, get the ParseTree from the parser and write it at the specified output
-      if (tree) {
-        AbstractSyntaxTree parserTree = parser.startParse();
-        //parserTree.clean_tree();
-        String tree_string = parserTree.print_tree();
-        System.out.println(tree_string);
-        CodeGenerator generator = new CodeGenerator(parserTree);
-        generator.generateCode();
-      //Otherwise, do the parse without collecting the ParseTree
-      } else {
-        parser.startParse();
+      Parser parser = new Parser(new BufferedReader(new FileReader(filePath)));
+      AbstractSyntaxTree ast = parser.startParse();
+      String tree_string = ast.print_tree();
+      System.out.println(tree_string);
+      CodeGenerator generator = new CodeGenerator(ast);
+      String llvmCode = generator.generateLLVM();
+      System.out.println(llvmCode);
+      if (toFile) {
+        generator.writeToFile(llvmCode, output);
+      }
+      if (toExec) {
+        if (output.isEmpty()) {
+          String llFileName = ast.getLabel().toLowerCase() + ".ll";
+          String bcFileName = ast.getLabel().toLowerCase() + ".bc";
+          ProcessBuilder pb = new ProcessBuilder("llvm-as", llFileName, "-o", bcFileName);
+          pb.inheritIO();
+          pb.start().waitFor();
+          ProcessBuilder pb2 = new ProcessBuilder("lli", bcFileName);
+          pb2.inheritIO();
+          pb2.start().waitFor();
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();

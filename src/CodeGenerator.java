@@ -38,9 +38,14 @@ public class CodeGenerator {
     this.count = 1;
   }
 
-  public void writeToFile(String llvmCode) {
+  public void writeToFile(String llvmCode, String filePath) {
+    String fileName;
     try {
-      String fileName = ast.getLabel().toLowerCase() + ".ll";
+      if (filePath.isEmpty()) {
+        fileName = ast.getLabel().toLowerCase() + ".ll";
+      } else {
+        fileName = filePath;
+      }
       BufferedWriter llvmFile = new BufferedWriter(new FileWriter(fileName));
       llvmFile.write(llvmCode);
       llvmFile.close();
@@ -49,7 +54,7 @@ public class CodeGenerator {
     }
   }
 
-  public void generateLLVM() {
+  public String generateLLVM() {
     String llvmCode = "";
     llvmCode += printFunction;
     llvmCode += readFunction;
@@ -64,8 +69,7 @@ public class CodeGenerator {
       }
     }
     llvmCode += "ret void \n}\n";
-    writeToFile(llvmCode);
-    System.out.println(llvmCode);
+    return llvmCode;
   }
 
   public String generateCode(AbstractSyntaxTree code) {
