@@ -20,7 +20,7 @@ public class Main {
     String output = "";
 
     if (args.length < 1 || args.length > 4) {
-      System.out.println("Usage: java -jar Part3.jar input.sf --option [-o [output.ll]] [-exec]");
+      System.out.println("Usage: java -jar Part3.jar input.sf --option [-o [output.ll] [-exec]]");
     }
 
     //Verbose option

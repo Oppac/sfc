@@ -8,6 +8,8 @@ public class CodeGenerator {
   private AbstractSyntaxTree ast;
   private LinkedHashMap<String, Integer> symbolicTable;
   private int count;
+  private int nestedLoop;
+  private int nestedIf;
 
   private String printFunction = (
   "@.strP = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n"
@@ -36,6 +38,8 @@ public class CodeGenerator {
     this.ast  = ast;
     this.symbolicTable = new LinkedHashMap<String, Integer>();
     this.count = 1;
+    this.nestedLoop = 0;
+    this.nestedLoop = 0;
   }
 
   public void writeToFile(String llvmCode, String filePath) {
@@ -191,39 +195,49 @@ public class CodeGenerator {
   }
 
   public String generateIf(AbstractSyntaxTree ifGen) {
+    nestedIf++;
     String llvmCode = "";
+    String trueFlag = "ifTrue" + nestedIf;
+    String falseFlag = "ifFalse" + nestedIf;
+    String noElseFlag = "ifNoElse" + nestedIf;
     llvmCode += generateCond(ifGen.getChild(0));
-    llvmCode += "br i1 %" + (count-1) + "," + "label %ifTrue, label %ifFalse\n";
-    llvmCode += "ifTrue:\n";
+    llvmCode += "br i1 %" + (count-1) + "," + "label %" + trueFlag + ", label %" + falseFlag + "\n";
+    llvmCode += trueFlag + ":\n";
     for (AbstractSyntaxTree child: ifGen.getChild(1).getChildren()) {
       llvmCode += generateCode(child);
     }
-    llvmCode += "br label %ifNoElse\n";
-    llvmCode += "ifFalse:\n";
+    llvmCode += "br label %" + noElseFlag + "\n";
+    llvmCode += falseFlag + ":\n";
     for (AbstractSyntaxTree child: ifGen.getChild(2).getChildren()) {
       llvmCode += generateCode(child);
     }
-    llvmCode += "br label %ifNoElse\n";
-    llvmCode += "ifNoElse:\n";
+    llvmCode += "br label %" + noElseFlag + "\n";
+    llvmCode += noElseFlag + ":\n";
     return llvmCode;
   }
 
   public String generateWhile(AbstractSyntaxTree whileGen) {
+    nestedLoop++;
     String llvmCode = "";
+    String startFlag = "startLoop" + nestedLoop;
+    String endFlag = "endLoop" + nestedLoop;
     llvmCode += generateCond(whileGen.getChild(0));
-    llvmCode += "br i1 %" + (count-1) + ", label %startLoop, label %endLoop\n";
-    llvmCode += "startLoop:\n";
+    llvmCode += "br i1 %" + (count-1) + ", label %" + startFlag + ", label %" + endFlag + "\n";
+    llvmCode += startFlag + ":\n";
     for (AbstractSyntaxTree child: whileGen.getChild(1).getChildren()) {
         llvmCode += generateCode(child);
     }
     llvmCode += generateCond(whileGen.getChild(0));
-    llvmCode += "br i1 %" + (count-1) + ", label %startLoop, label %endLoop\n";
-    llvmCode += "endLoop:\n";
+    llvmCode += "br i1 %" + (count-1) + ", label %" + startFlag + ", label %" + endFlag + "\n";
+    llvmCode += endFlag + ":\n";
     return llvmCode;
   }
 
   public String generateFor(AbstractSyntaxTree forGen) {
+    nestedLoop++;
     String llvmCode = "";
+    String startFlag = "startLoop" + nestedLoop;
+    String endFlag = "endLoop" + nestedLoop;
     String varName = forGen.getChild(0).getLabel();
     if (symbolicTable.containsKey(varName)) {
       llvmCode += computeExprArith(forGen.getChild(2));
@@ -241,9 +255,9 @@ public class CodeGenerator {
     } else {
       llvmCode += "%" + count + " = icmp slt i32 %" + (count-1) + ", " + forGen.getChild(3).getLabel() + "\n";
     }
-    llvmCode += "br i1 %" + count + ", label %startLoop, label %endLoop\n";
+    llvmCode += "br i1 %" + count + ", label %" + startFlag + ", label %" + endFlag + "\n";
     count++;
-    llvmCode += "startLoop:\n";
+    llvmCode += startFlag + ":\n";
     llvmCode += generateCode(forGen.getChild(1));
     llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
     count++;
@@ -257,9 +271,9 @@ public class CodeGenerator {
     } else {
       llvmCode += "%" + count + " = icmp slt i32 %" + (count-1) + ", " + forGen.getChild(3).getLabel() + "\n";
     }
-    llvmCode += "br i1 %" + count + ", label %startLoop, label %endLoop\n";
+    llvmCode += "br i1 %" + count + ", label %" + startFlag + ", label %" + endFlag + "\n";
     count++;
-    llvmCode += "endLoop:\n";
+    llvmCode += endFlag + ":\n";
     return llvmCode;
   }
 
