@@ -239,11 +239,13 @@ public class CodeGenerator {
     String startFlag = "startLoop" + nestedLoop;
     String endFlag = "endLoop" + nestedLoop;
     String varName = forGen.getChild(0).getLabel();
+    llvmCode += computeExprArith(forGen.getChild(2));
     if (symbolicTable.containsKey(varName)) {
-      llvmCode += computeExprArith(forGen.getChild(2));
       llvmCode += "store i32 %" + (count-1) + ", i32* %" + varName + "\n";
     } else {
-      throw new Error("Variable " + varName + " is not declared");
+      llvmCode += "%" + varName + " = alloca i32\n";
+      symbolicTable.put(varName, null);
+      llvmCode += "store i32 %" + (count-1) + ", i32* %" + varName + "\n";
     }
     llvmCode += computeExprArith(forGen.getChild(3));
     llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
