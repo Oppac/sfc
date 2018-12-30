@@ -1,8 +1,9 @@
 
 BEGINPROG Factorial
-VARIABLES number, result 
+VARIABLES number, result
   READ(number)
-  result := (3 + 4 * 2)
+  number := number + 1
+  result := 1
   IF (number >= 0) THEN
     FOR i := 1 TO number DO
       result := result * i
@@ -11,8 +12,4 @@ VARIABLES number, result
   ELSE      
     PRINT(-1)
   ENDIF
-
-
-
-
 ENDPROG

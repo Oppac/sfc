@@ -1,6 +1,6 @@
 BEGINPROG Euclid
 
-VARIABLES a, b
+VARIABLES a, b, c
 
   READ(a)
   READ(b)

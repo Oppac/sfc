@@ -1,0 +1,17 @@
+BEGINPROG While
+VARIABLES x, a, b
+a:= 5
+b:= 1
+x:= 2
+
+WHILE x < 10 DO
+    WHILE b < 5 DO
+	b := b + 1
+        PRINT(b)
+    ENDWHILE
+      x := x + 1
+      PRINT(x)
+ENDWHILE
+
+ENDPROG
+

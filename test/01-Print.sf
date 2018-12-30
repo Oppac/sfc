@@ -1,0 +1,8 @@
+BEGINPROG Print
+VARIABLES x, a
+
+x := 0
+a := 2 + 2
+PRINT(x, a)
+
+ENDPROG

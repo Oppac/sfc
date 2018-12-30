@@ -1,0 +1,6 @@
+BEGINPROG Ast
+VARIABLES a
+
+a := -2 + 3 * (6 - 1) / 5
+
+ENDPROG
