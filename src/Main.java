@@ -50,10 +50,12 @@ public class Main {
       String llvmCode = generator.generateLLVM();
       System.out.println(llvmCode);
 
+      //Write the IR code to a file.
       if (toFile) {
         generator.writeToFile(llvmCode, output);
       }
 
+      //Execute code written in the .ll file.
       try {
         if (toExec) {
           String llFileName, bcFileName;

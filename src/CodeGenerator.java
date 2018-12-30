@@ -155,6 +155,8 @@ public class CodeGenerator {
           llvmCode += "%" + count + " = mul i32 %" + leftExpr + ", %" + rightExpr + "\n";
         } else if (value.equals("/")) {
           llvmCode += "%" + count + " = sdiv i32 %" + leftExpr + ", %" + rightExpr + "\n";
+        } else {
+          llvmCode += "%" + count + " = add i32 %" + leftExpr + ", %" + rightExpr + "\n";
         }
       }
     }

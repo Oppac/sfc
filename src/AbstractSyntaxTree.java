@@ -115,7 +115,7 @@ public class AbstractSyntaxTree {
   List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
   List<AbstractSyntaxTree> toAdd = new ArrayList<AbstractSyntaxTree>();
   for (AbstractSyntaxTree child: children) {
-    if (label.equals(child.getLabel()) && label.equals("-") && child.getChildren().size() == 1) {
+    if (label.equals(child.getLabel()) && child.getChildren().size() == 1) {
       toAdd.addAll(child.getChildren());
       toRemove.add(child);
     } else {
