@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/** Parser class that check that the rule of the grammar are respected
+* by the .sf input program and generate an abstract syntax tree. It
+* returns a AST. During the parsing the relevant nodes are added to the AST.
+* @param filePath path to the file to parse
+*/
+
 public class Parser {
   private Lexer scanner;
   private Symbol lookahead;
@@ -15,10 +21,17 @@ public class Parser {
     this.lookahead = scanner.yylex();
   }
 
+  /** Fetch the next token to parse.
+  */
   private void nextToken() throws IOException {
     this.lookahead = scanner.yylex();
   }
 
+  /** Compare the expected token to the current token. It doesn't return anything.
+  * It is used when the comparaison is irrelevant to the AST and only used to check
+  * the correctness of the grammar.
+  * @param token the expected token.
+  */
   private void compareToken(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
       throw new Error("\nError at line " + lookahead.getLine() + ": " +
@@ -27,6 +40,12 @@ public class Parser {
     nextToken();
   }
 
+  /** Compare the expected token to the current token. Variant of compareToken()
+  * method. It return a AST node with a label relevant to the AST. It check the
+  * correctness of the grammar like the previous method.
+  * @param token the expected token.
+  * @return a new AST node with a relevant label
+  */
   private AbstractSyntaxTree compareTokenAdd(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
       throw new Error("\nError at line " + lookahead.getLine() + ": " +
@@ -37,11 +56,15 @@ public class Parser {
     return new AbstractSyntaxTree(label);
   }
 
+  /** Start the parsing of the input file at the initial symbol of the grammar.
+  */
   public AbstractSyntaxTree startParse() throws IOException {
     return program();
   }
 
 
+  /** Skip empty lines
+  */
   private void skipEndline() throws IOException {
     while (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
       nextToken();
@@ -63,8 +86,8 @@ public class Parser {
     compareToken(LexicalUnit.ENDPROG);
     skipEndline();
     compareToken(LexicalUnit.EOS);
-    ast.removeEpsilons();
-    ast.removeBadMinus();
+    ast.removeEpsilons();  // Remove useless nodes.
+    ast.removeBadMinus();  // Correct bad minus bug in case it appears.
     return ast;
   }
 
