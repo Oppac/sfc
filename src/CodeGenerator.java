@@ -3,6 +3,10 @@ import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 
+/** Class that generate the IR code based on the AST received from the parser.
+* It returns a string, that can be printed on the console or written in a file.
+*/
+
 public class CodeGenerator {
 
   private AbstractSyntaxTree ast;
@@ -11,6 +15,7 @@ public class CodeGenerator {
   private int nestedLoop;
   private int nestedIf;
 
+  //Function used to print on stdout
   private String printFunction = (
   "@.strP = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n"
   + "define void @println(i32 %x) {\n"
@@ -23,6 +28,7 @@ public class CodeGenerator {
   + "declare i32 @printf(i8*, ...)\n"
   );
 
+  //Function used to read on stdin
   private String readFunction = (
   "@.strR = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1\n"
   + "define i32 @readInt() {\n"
@@ -34,6 +40,11 @@ public class CodeGenerator {
   + "declare i32 @__isoc99_scanf(i8*, ...)\n"
   );
 
+  /** The class take a AST as input. It will generate IR code for this tree.
+  * The class has a symbolic table to keep track of the declared values, a general
+  * counter and two counters used for nested ifs and loops.
+  * @param ast the AST from which the IR code is generated.
+  */
   public CodeGenerator(AbstractSyntaxTree ast) {
     this.ast  = ast;
     this.symbolicTable = new LinkedHashMap<String, Integer>();
@@ -42,6 +53,7 @@ public class CodeGenerator {
     this.nestedLoop = 0;
   }
 
+  //Write the IR to a specified file.
   public void writeToFile(String llvmCode, String filePath) {
     String fileName;
     try {
@@ -58,6 +70,7 @@ public class CodeGenerator {
     }
   }
 
+  //Start the IR generation.
   public String generateLLVM() {
     String llvmCode = "";
     llvmCode += printFunction;
