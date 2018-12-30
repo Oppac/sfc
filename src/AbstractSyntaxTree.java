@@ -4,7 +4,6 @@ import java.util.List;
 public class AbstractSyntaxTree {
 
   private String label;
-  private AbstractSyntaxTree parent;
   private List<AbstractSyntaxTree> children = new ArrayList<AbstractSyntaxTree>();
 
   public AbstractSyntaxTree() {
@@ -80,32 +79,21 @@ public class AbstractSyntaxTree {
     children.addAll(toAdd);
   }
 
-  public void removeNot() {
-    List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
-    List<AbstractSyntaxTree> toAdd = new ArrayList<AbstractSyntaxTree>();
-    for (AbstractSyntaxTree child: children) {
-      if (child.getLabel().equals("NOT") && child.getChildren().size() == 1) {
-        toAdd.addAll(child.getChildren());
-        if (child.getChild(0).getLabel().equals("=")) {
-          child.getChild(0).addLabel("<>");
-        } else if (child.getChild(0).getLabel().equals(">=")) {
-          child.getChild(0).addLabel("<");
-        } else if (child.getChild(0).getLabel().equals(">")) {
-          child.getChild(0).addLabel("<=");
-        } else if (child.getChild(0).getLabel().equals("<=")) {
-          child.getChild(0).addLabel(">");
-        } else if (child.getChild(0).getLabel().equals("<")) {
-          child.getChild(0).addLabel(">=");
-        } else if (child.getChild(0).getLabel().equals("<>")) {
-          child.getChild(0).addLabel("=");
-        }
-        toRemove.add(child);
-      } else {
-        child.removeNot();
-      }
+  public AbstractSyntaxTree reverseCond(AbstractSyntaxTree cond) {
+    if (cond.getLabel().equals("=")) {
+      cond.addLabel("<>");
+    } else if (cond.getLabel().equals(">=")) {
+      cond.addLabel("<");
+    } else if (cond.getLabel().equals(">")) {
+      cond.addLabel("<=");
+    } else if (cond.getLabel().equals("<=")) {
+      cond.addLabel(">");
+    } else if (cond.getLabel().equals("<")) {
+      cond.addLabel(">=");
+    } else if (cond.getLabel().equals("<>")) {
+      cond.addLabel("=");
     }
-    children.removeAll(toRemove);
-    children.addAll(toAdd);
+    return cond;
   }
 
   public void simplifyExpr() {
@@ -122,13 +110,13 @@ public class AbstractSyntaxTree {
     children.removeAll(toRemove);
   }
 
-  public String print_tree() {
+  public String printTree() {
       StringBuilder tree = new StringBuilder();
       tree.append("\n[");
       tree.append(label);
       if (children != null) {
           for (AbstractSyntaxTree child: children) {
-              tree.append(child.print_tree());
+              tree.append(child.printTree());
           }
       }
       tree.append("]\n");

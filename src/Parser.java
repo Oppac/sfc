@@ -10,35 +10,15 @@ public class Parser {
   private Lexer scanner;
   private Symbol lookahead;
 
-  /**
-  * Constructor for the Parser.
-  * Set up a scanner and assigns a value to each rules of
-  * the grammar. It is either the number of the rule in the grammar or
-  * it's name if verbose is active.
-  * @param filePath path to the file to parse
-  * @param v tell if the verbose option is active or not
-  * @param t tell if the option for drawing the tree is active or not
-  */
-
   public Parser(BufferedReader filePath) throws IOException {
     this.scanner = new Lexer(filePath);
     this.lookahead = scanner.yylex();
   }
 
-  /*
-  * Fetch the next token to parse.
-  */
   private void nextToken() throws IOException {
     this.lookahead = scanner.yylex();
   }
 
-  /**
-  * Compare the expected token to the current token.
-  * @param token the expected token.
-  * @return if the tokens match, return a AbstractSyntaxTree (either null or with
-  * the proper label if draw tree is active).
-  * @throws IOException give an error if the tokens do not match.
-  */
   private void compareToken(LexicalUnit token) throws IOException {
     if (!(lookahead.getType().equals(token))){
       throw new Error("\nError at line " + lookahead.getLine() + ": " +
@@ -57,42 +37,17 @@ public class Parser {
     return new AbstractSyntaxTree(label);
   }
 
-  /**
-  * Start the parsing of the input file at the initial symbol of the grammar.
-  * @return if the tree drawing is not active the parser return an empty AbstractSyntaxTree. If
-  * the execution was without errors the proper rules numbers/names have been written
-  * on the standard output. We don't need retrieve the tree in this case so all the nodes are null.
-  * @return if the tree drawing option was active, the parser return a AbstractSyntaxTree
-  * containing the nodes with their labels and children. The ParsTree can then be
-  * retrieve by Main in order to write the tree on the specified file.
-  */
   public AbstractSyntaxTree startParse() throws IOException {
     return program();
   }
 
-  /**
-  * We allowed the input program to have as many endlines has it want at some specific
-  * points in the program. They are ignored by the "standard" parser and return a node
-  * called "SkipLines" for the AbstractSyntaxTree. It allow to see in the tree where extra
-  * endlines are.
-  * @return a "SkipLines" node for the AbstractSyntaxTree.
-  */
+
   private void skipEndline() throws IOException {
     while (lookahead.getType().equals(LexicalUnit.ENDLINE)) {
       nextToken();
     }
   }
 
-  /**
-  * The first step of the parsing. The function has two "modes". One where the option to
-  * draw the tree is inactive and the other one where it is active. In the "inactive mode"
-  * the parser only check that the input is correct. It returns a null node as the
-  * AbstractSyntaxTree will be discarded at the end anyway. In the "active mode", a new AbstractSyntaxTree
-  * following the rules defined in AbstractSyntaxTree.java is returned instead. In both case
-  * the rule number/name is printed on the standard output.
-  * The other functions will not be detailed but they all follow the same model.
-  * @return a AbstractSyntaxTree either correct or null depending on the selected option.
-  */
   //[01] <Program> -> BEGINPROG [ProgName] [EndLine] <Variables> <Code> ENDPROG
   private AbstractSyntaxTree program() throws IOException {
     AbstractSyntaxTree ast = new AbstractSyntaxTree();
@@ -386,9 +341,9 @@ public class Parser {
   //[40] <SimpleCond> -> <ExprArith> <Comp> <ExprArith>
   private AbstractSyntaxTree simpleCond() throws IOException {
     if (lookahead.getType().equals(LexicalUnit.NOT)) {
-      AbstractSyntaxTree ast = new AbstractSyntaxTree();
-      ast.addLabel(compareTokenAdd(LexicalUnit.NOT).getLabel());
-      ast.addChild(simpleCond());
+      compareToken(LexicalUnit.NOT);
+      AbstractSyntaxTree ast = simpleCond();
+      ast.reverseCond(ast);
       return ast;
     } else {
       AbstractSyntaxTree ast = new AbstractSyntaxTree();
