@@ -65,23 +65,22 @@ public class AbstractSyntaxTree {
     children.removeAll(toRemove);
   }
 
-  //Remove duplicate minus when it is before an ExprArith
   public void removeBadMinus() {
-    List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
-    List<AbstractSyntaxTree> toAdd = new ArrayList<AbstractSyntaxTree>();
-    for (AbstractSyntaxTree child: children) {
-      if (label.equals(child.getLabel()) && child.getChildren().size() == 1) {
-        toAdd.addAll(child.getChildren());
-        toRemove.add(child);
-      } else if (label.equals("-e") && child.getLabel().equals("-e")) {
-        toAdd.addAll(child.getChildren());
-        toRemove.add(child);
-      } else {
-        child.removeBadMinus();
-      }
+  List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
+  List<AbstractSyntaxTree> toAdd = new ArrayList<AbstractSyntaxTree>();
+  for (AbstractSyntaxTree child: children) {
+    if (label.equals(child.getLabel()) && child.getChildren().size() == 1) {
+      toAdd.addAll(child.getChildren());
+      toRemove.add(child);
+    } else if (label.equals("-e") && child.getLabel().equals("-e")) {
+      toAdd.addAll(child.getChildren());
+      toRemove.add(child);
+    } else {
+      child.removeBadMinus();
     }
-    children.removeAll(toRemove);
-    children.addAll(toAdd);
+  }
+  children.removeAll(toRemove);
+  children.addAll(toAdd);
   }
 
   public AbstractSyntaxTree reverseCond(AbstractSyntaxTree cond) {

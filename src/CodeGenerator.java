@@ -105,10 +105,14 @@ public class CodeGenerator {
     if (exprArith.getChildren().size() == 0) {
       if (symbolicTable.containsKey(exprArith.getLabel())) {
         llvmCode += "%" + count + " = load i32, i32* %" + exprArith.getLabel() + "\n";
-        count++;
-        llvmCode += "%" + count + " = add i32 0, %" + (count-1) + "\n";
       } else {
         llvmCode += "%" + count + " = add i32 0, " + exprArith.getLabel() + "\n";
+      }
+    } else if (exprArith.getChildren().size() == 1) {
+      if (symbolicTable.containsKey(exprArith.getChild(0).getLabel())) {
+        llvmCode += "%" + count + " = load i32, i32* %" + exprArith.getChild(0).getLabel() + "\n";
+      } else {
+        llvmCode += "%" + count + " = add i32 0, " + exprArith.getChild(0).getLabel() + "\n";
       }
     } else {
       llvmCode += computeExprArith(exprArith.getChild(0));
@@ -117,12 +121,28 @@ public class CodeGenerator {
       rightExpr = count-1;
       if (value.equals("+")) {
         llvmCode += "%" + count + " = add i32 %" + leftExpr + ", %" + rightExpr + "\n";
-      } else if (value.equals("-") || value.equals("-e")) {
+      } else if (value.equals("-")) {
         llvmCode += "%" + count + " = sub i32 %" + leftExpr + ", %" + rightExpr + "\n";
       } else if (value.equals("*")) {
         llvmCode += "%" + count + " = mul i32 %" + leftExpr + ", %" + rightExpr + "\n";
       } else if (value.equals("/")) {
         llvmCode += "%" + count + " = sdiv i32 %" + leftExpr + ", %" + rightExpr + "\n";
+      }
+      if (exprArith.getChildren().size() == 3) {
+        value = exprArith.getChild(2).getLabel();
+        count++;
+        leftExpr = count-1;
+        llvmCode += computeExprArith(exprArith.getChild(2));
+        rightExpr = count - 1;
+        if (value.equals("+")) {
+          llvmCode += "%" + count + " = add i32 %" + leftExpr + ", %" + rightExpr + "\n";
+        } else if (value.equals("-")) {
+          llvmCode += "%" + count + " = sub i32 %" + leftExpr + ", %" + rightExpr + "\n";
+        } else if (value.equals("*")) {
+          llvmCode += "%" + count + " = mul i32 %" + leftExpr + ", %" + rightExpr + "\n";
+        } else if (value.equals("/")) {
+          llvmCode += "%" + count + " = sdiv i32 %" + leftExpr + ", %" + rightExpr + "\n";
+        }
       }
     }
     count++;
@@ -239,7 +259,8 @@ public class CodeGenerator {
     String startFlag = "startLoop" + nestedLoop;
     String endFlag = "endLoop" + nestedLoop;
     String varName = forGen.getChild(0).getLabel();
-    llvmCode += computeExprArith(forGen.getChild(2));
+    int var;
+    llvmCode += computeExprArith(forGen.getChild(1));
     if (symbolicTable.containsKey(varName)) {
       llvmCode += "store i32 %" + (count-1) + ", i32* %" + varName + "\n";
     } else {
@@ -247,31 +268,35 @@ public class CodeGenerator {
       symbolicTable.put(varName, null);
       llvmCode += "store i32 %" + (count-1) + ", i32* %" + varName + "\n";
     }
-    llvmCode += computeExprArith(forGen.getChild(3));
+    llvmCode += computeExprArith(forGen.getChild(2));
     llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
+    var = count;
     count++;
-    if (symbolicTable.containsKey(forGen.getChild(3).getLabel())) {
-      llvmCode += "%" + count + " = load i32, i32* %" + forGen.getChild(3).getLabel() + "\n";
+    if (symbolicTable.containsKey(forGen.getChild(2).getLabel())) {
+      llvmCode += "%" + count + " = load i32, i32* %" + forGen.getChild(2).getLabel() + "\n";
       count++;
       llvmCode += "%" + count + " = icmp slt i32 %" + (count-2) + ", %" + (count-1) + "\n";
     } else {
-      llvmCode += "%" + count + " = icmp slt i32 %" + (count-1) + ", " + forGen.getChild(3).getLabel() + "\n";
+      llvmCode += computeExprArith(forGen.getChild(2));
+      llvmCode += "%" + count + " = icmp slt i32 %" + var + ", %" + (count-1) + "\n";
     }
     llvmCode += "br i1 %" + count + ", label %" + startFlag + ", label %" + endFlag + "\n";
     count++;
     llvmCode += startFlag + ":\n";
-    llvmCode += generateCode(forGen.getChild(1));
+    llvmCode += generateCode(forGen.getChild(3));
     llvmCode += "%" + count + " = load i32, i32* %" + varName + "\n";
     count++;
     llvmCode += "%" + count + " = add i32 1, %" + (count-1) + "\n";
+    var = count;
     count++;
     llvmCode += "store i32 %" + (count-1) + ", i32* %" + varName + "\n";
-    if (symbolicTable.containsKey(forGen.getChild(3).getLabel())) {
-      llvmCode += "%" + count + " = load i32, i32* %" + forGen.getChild(3).getLabel() + "\n";
+    if (symbolicTable.containsKey(forGen.getChild(2).getLabel())) {
+      llvmCode += "%" + count + " = load i32, i32* %" + forGen.getChild(2).getLabel() + "\n";
       count++;
       llvmCode += "%" + count + " = icmp slt i32 %" + (count-2) + ", %" + (count-1) + "\n";
     } else {
-      llvmCode += "%" + count + " = icmp slt i32 %" + (count-1) + ", " + forGen.getChild(3).getLabel() + "\n";
+      llvmCode += computeExprArith(forGen.getChild(2));
+      llvmCode += "%" + count + " = icmp slt i32 %" + var + ", %" + (count-1) + "\n";
     }
     llvmCode += "br i1 %" + count + ", label %" + startFlag + ", label %" + endFlag + "\n";
     count++;

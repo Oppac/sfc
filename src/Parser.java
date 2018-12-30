@@ -157,7 +157,7 @@ public class Parser {
 
   //[16] <ExprArith> -> <HpProd> <LpExpr>
   private AbstractSyntaxTree exprArith() throws IOException {
-      AbstractSyntaxTree ast = new AbstractSyntaxTree("Expr");
+      AbstractSyntaxTree ast = new AbstractSyntaxTree();
       ast.addChild(hpProd());
       ast.addChildLabel(lpExpr());
       ast.removeEpsilons();
@@ -170,10 +170,9 @@ public class Parser {
 
   //[17] <HpProd> -> <SimpleExpr> <HpExpr>
   private AbstractSyntaxTree hpProd() throws IOException {
-    AbstractSyntaxTree ast = new AbstractSyntaxTree("Prod");
+    AbstractSyntaxTree ast = new AbstractSyntaxTree();
     ast.addChild(simpleExpr());
     ast.addChildLabel(hpExpr());
-    //ast.addLabel(ast.getChild(1).getLabel());
     ast.removeEpsilons();
     if (ast.getChildren().size() == 1) {
       AbstractSyntaxTree atomExpr = ast.getChild(0);
@@ -231,7 +230,7 @@ public class Parser {
         return ast3;
       case MINUS:
         AbstractSyntaxTree ast4 = new AbstractSyntaxTree();
-        ast4.addLabel(compareTokenAdd(LexicalUnit.MINUS).getLabel() + "e");
+        ast4.addLabel(compareTokenAdd(LexicalUnit.MINUS).getLabel());
         ast4.addChild(new AbstractSyntaxTree("0"));
         ast4.addChild(simpleExpr());
         return ast4;
