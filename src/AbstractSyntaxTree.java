@@ -30,6 +30,13 @@ public class AbstractSyntaxTree {
     this.children.add(child);
   }
 
+  public void addChildLabel(AbstractSyntaxTree child) {
+    this.label = child.getLabel();
+    for (AbstractSyntaxTree c: child.getChildren()) {
+      this.children.add(c);
+    }
+  }
+
   public void addChild(List<AbstractSyntaxTree> children) {
     this.children.addAll(children);
   }
@@ -58,21 +65,19 @@ public class AbstractSyntaxTree {
     children.removeAll(toRemove);
   }
 
-  public void removeSingleExpr() {
+  //Remove duplicate minus when it is before an ExprArith
+  public void removeBadMinus() {
     List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
     List<AbstractSyntaxTree> toAdd = new ArrayList<AbstractSyntaxTree>();
     for (AbstractSyntaxTree child: children) {
-      if (child.getLabel().equals("Expr") && child.getChildren().size() == 1) {
-        toAdd.addAll(child.getChildren());
-        toRemove.add(child);
-      } else if (label.equals(child.getLabel()) && child.getChildren().size() == 0) {
+      if (label.equals(child.getLabel()) && child.getChildren().size() == 1) {
         toAdd.addAll(child.getChildren());
         toRemove.add(child);
       } else if (label.equals("-e") && child.getLabel().equals("-e")) {
         toAdd.addAll(child.getChildren());
         toRemove.add(child);
       } else {
-        child.removeSingleExpr();
+        child.removeBadMinus();
       }
     }
     children.removeAll(toRemove);
@@ -94,20 +99,6 @@ public class AbstractSyntaxTree {
       cond.addLabel("=");
     }
     return cond;
-  }
-
-  public void simplifyExpr() {
-    List<AbstractSyntaxTree> toRemove = new ArrayList<AbstractSyntaxTree>();
-    for (AbstractSyntaxTree child: children) {
-      if (child.getLabel().equals("+") || child.getLabel().equals("*") ||
-          child.getLabel().equals("/") || child.getLabel().equals("-")) {
-        label = child.getLabel();
-        child.addLabel(child.getChild(0).getLabel());
-        toRemove.add(child.getChild(0));
-      }
-      child.simplifyExpr();
-    }
-    children.removeAll(toRemove);
   }
 
   public String printTree() {

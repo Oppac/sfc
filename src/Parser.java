@@ -64,9 +64,7 @@ public class Parser {
     skipEndline();
     compareToken(LexicalUnit.EOS);
     ast.removeEpsilons();
-    ast.removeSingleExpr();
-    ast.simplifyExpr();
-    ast.removeSingleExpr();
+    ast.removeBadMinus();
     return ast;
   }
 
@@ -161,16 +159,27 @@ public class Parser {
   private AbstractSyntaxTree exprArith() throws IOException {
       AbstractSyntaxTree ast = new AbstractSyntaxTree("Expr");
       ast.addChild(hpProd());
-      ast.addChild(lpExpr());
+      ast.addChildLabel(lpExpr());
+      ast.removeEpsilons();
+      if (ast.getChildren().size() == 1) {
+        AbstractSyntaxTree atomExpr = ast.getChild(0);
+        return atomExpr;
+      }
       return ast;
     }
 
   //[17] <HpProd> -> <SimpleExpr> <HpExpr>
-  private List<AbstractSyntaxTree> hpProd() throws IOException {
-    List<AbstractSyntaxTree> arr = new ArrayList<AbstractSyntaxTree>();
-    arr.add(simpleExpr());
-    arr.add(hpExpr());
-    return arr;
+  private AbstractSyntaxTree hpProd() throws IOException {
+    AbstractSyntaxTree ast = new AbstractSyntaxTree("Prod");
+    ast.addChild(simpleExpr());
+    ast.addChildLabel(hpExpr());
+    //ast.addLabel(ast.getChild(1).getLabel());
+    ast.removeEpsilons();
+    if (ast.getChildren().size() == 1) {
+      AbstractSyntaxTree atomExpr = ast.getChild(0);
+      return atomExpr;
+    }
+    return ast;
   }
 
   //[18] <HpExpr> -> <HpOp> <SimpleExpr> <HpExpr>
